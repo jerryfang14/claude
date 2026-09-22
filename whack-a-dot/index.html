@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whack-a-Dot</title>
+<style>
+  :root { --bg:#111827; --cell:#1f2937; --hot:#f59e0b; --text:#f9fafb; --muted:#9ca3af; }
+  body { margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+         background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:16px; box-sizing:border-box; }
+  h1 { margin:0 0 8px; }
+  #hud { display:flex; gap:24px; margin-bottom:16px; color:var(--muted); }
+  #hud b { color:var(--text); }
+  #grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:min(90vw,360px); }
+  .cell { aspect-ratio:1; background:var(--cell); border-radius:16px; border:none; cursor:pointer; position:relative;
+          color:var(--muted); font-size:14px; transition:transform .08s; }
+  .cell:active { transform:scale(.95); }
+  .cell.on { background:var(--hot); box-shadow:0 0 24px var(--hot); color:#111; }
+  .cell.miss { background:#ef4444; }
+  #start { margin-top:20px; padding:12px 28px; font-size:18px; border:none; border-radius:10px; background:var(--hot); cursor:pointer; }
+  #msg { margin-top:12px; min-height:1.4em; color:var(--muted); }
+</style>
+</head>
+<body>
+<h1>Whack-a-Dot</h1>
+<div id="hud">Score <b id="score">0</b> Lives <b id="lives">3</b> Best <b id="best">0</b></div>
+<div id="grid"></div>
+<button id="start">Start</button>
+<div id="msg">Click lit cells or press keys 1–9 (numpad layout works too).</div>
+<script>
+const grid = document.getElementById('grid');
+const $ = id => document.getElementById(id);
+// Keys 7-8-9 on top row, like a numpad
+const keyMap = ['7','8','9','4','5','6','1','2','3'];
+const cells = keyMap.map((k, i) => {
+  const b = document.createElement('button');
+  b.className = 'cell'; b.textContent = k;
+  b.onclick = () => hit(i);
+  grid.appendChild(b);
+  return b;
+});
+let best = 0;
+try { best = +localStorage.getItem('wad-best') || 0; } catch {}
+$('best').textContent = best;
+
+let score, lives, active, timer, running = false;
+
+function start() {
+  score = 0; lives = 3; active = -1; running = true;
+  update(); $('msg').textContent = ''; $('start').hidden = true;
+  next();
+}
+function lifetime() { return Math.max(350, 1100 - score * 25); }
+function next() {
+  if (!running) return;
+  let i; do { i = Math.floor(Math.random() * 9); } while (i === active);
+  active = i; cells[i].classList.add('on');
+  timer = setTimeout(() => { cells[i].classList.remove('on'); lose(i); }, lifetime());
+}
+function hit(i) {
+  if (!running) return;
+  if (i === active) {
+    clearTimeout(timer); cells[i].classList.remove('on'); active = -1;
+    score++; update(); setTimeout(next, 120);
+  } else {
+    flash(i); lives--; update(); if (lives <= 0) end();
+  }
+}
+function lose(i) {
+  active = -1; flash(i); lives--; update();
+  if (lives <= 0) end(); else setTimeout(next, 200);
+}
+function flash(i) { cells[i].classList.add('miss'); setTimeout(() => cells[i].classList.remove('miss'), 250); }
+function update() { $('score').textContent = score; $('lives').textContent = lives; }
+function end() {
+  running = false; clearTimeout(timer); cells.forEach(c => c.classList.remove('on'));
+  if (score > best) { best = score; try { localStorage.setItem('wad-best', best); } catch {} $('best').textContent = best; }
+  $('msg').textContent = `Game over! You scored ${score}.`;
+  $('start').textContent = 'Play again'; $('start').hidden = false;
+}
+$('start').onclick = start;
+document.addEventListener('keydown', e => {
+  const i = keyMap.indexOf(e.key);
+  if (i >= 0) hit(i);
+  else if ((e.key === ' ' || e.key === 'Enter') && !running) { e.preventDefault(); start(); }
+});
+</script>
+</body>
+</html>
