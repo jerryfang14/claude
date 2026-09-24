@@ -307,7 +307,7 @@ h1, h2, h3, p, figure { margin: 0; }
 /* ---------- navigation (floating island) ---------- */
 .site-nav {
   position: fixed;
-  top: calc(var(--shell-inset) + 16px);
+  top: calc(env(safe-area-inset-top, 0px) + var(--shell-inset) + 16px);
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--z-nav);
@@ -393,7 +393,7 @@ h1, h2, h3, p, figure { margin: 0; }
   display: grid;
   align-content: center;
   gap: 8px;
-  padding: 120px var(--gutter) 60px;
+  padding: calc(env(safe-area-inset-top, 0px) + 120px) var(--gutter) calc(env(safe-area-inset-bottom, 0px) + 60px);
   background: rgba(17, 18, 19, 0.84);
   -webkit-backdrop-filter: blur(28px);
   backdrop-filter: blur(28px);
@@ -514,7 +514,7 @@ h1, h2, h3, p, figure { margin: 0; }
 
 /* scroll-scrubbed mode (desktop, motion allowed, film available) */
 .is-scrub .hero { height: 340vh; }
-.is-scrub .hero-stage { position: sticky; top: 0; height: 100vh; height: 100dvh; }
+.is-scrub .hero-stage { position: sticky; top: env(safe-area-inset-top, 0px); height: 100vh; height: 100dvh; }
 .is-scrub .band:not(.band-0) { display: block; opacity: 0; visibility: hidden; }
 .is-scrub .band-1, .is-scrub .band-2 { top: 50%; margin-top: -3.5em; }
 .is-scrub .band-3 { bottom: clamp(48px, 10vh, 100px); }
@@ -772,7 +772,7 @@ h1, h2, h3, p, figure { margin: 0; }
 .build-sum span { font-size: 0.875rem; color: var(--muted); }
 .build-price { font: 600 1.25rem/1 var(--font-mono); margin-left: auto; }
 
-.ticket-col { position: sticky; top: 104px; }
+.ticket-col { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 104px); }
 .ticket {
   position: relative;
   padding: 26px 28px 30px;
@@ -979,7 +979,7 @@ h1, h2, h3, p, figure { margin: 0; }
   gap: clamp(40px, 6vw, 110px);
   align-items: start;
 }
-.rules-head { position: sticky; top: 120px; }
+.rules-head { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 120px); }
 .rules-head .h2 { font-size: clamp(2.4rem, 4.5vw, 4.5rem); }
 .rules-seal { width: 84px; margin-top: 40px; }
 .rules { margin: 0; padding: 0; list-style: none; }
