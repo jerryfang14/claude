@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wok Express brand board</title>
+<style>
+  @font-face { font-family: "Archivo"; src: url("../../site/assets/fonts/archivo-latin.woff2") format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; }
+  @font-face { font-family: "JetBrains Mono"; src: url("../../site/assets/fonts/jetbrains-mono-latin.woff2") format("woff2"); font-weight: 400 800; }
+  @font-face { font-family: "Noto Serif TC"; src: url("../../site/assets/fonts/noto-serif-tc-900-subset.woff2") format("woff2"); font-weight: 900; }
+  :root {
+    --paper: #F3F2EE; --surface: #FBFBF9; --ink: #17191B; --muted: #5E6166;
+    --seal: #C43A25; --seal-d: #E0563E; --iron: #111213; --iron-2: #1A1C1E; --line: rgba(23,25,27,.12);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0C0D0E; font-family: "Archivo", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  .board { width: 1800px; height: 1350px; padding: 28px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 18px; }
+  .p { position: relative; overflow: hidden; background: var(--paper); }
+  .p .pg { position: absolute; left: 22px; bottom: 18px; font: 500 11px/1 "JetBrains Mono", monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .p.dark .pg { color: #8A8B88; }
+  .dark { background: var(--iron); color: #ECEBE6; }
+  .center { display: grid; place-items: center; }
+
+  /* 1 cover */
+  .cover .lock { display: flex; align-items: center; gap: 22px; }
+  .cover .lock img { width: 92px; height: 92px; }
+  .cover .word { font-size: 58px; font-weight: 600; font-stretch: 112%; letter-spacing: -0.035em; }
+
+  /* 2 construction */
+  .cons svg { width: 300px; height: 300px; overflow: visible; }
+  .cons .note { position: absolute; right: 22px; bottom: 18px; text-align: right; font: 400 11px/1.7 "JetBrains Mono", monospace; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+
+  /* 3 browser */
+  .browser { position: absolute; inset: 34px 30px 52px; background: var(--iron); border-radius: 14px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(0,0,0,.45); }
+  .browser .bar { height: 34px; background: #1C1E20; display: flex; align-items: center; gap: 7px; padding: 0 12px; }
+  .browser .bar i { width: 9px; height: 9px; border-radius: 50%; background: #3A3C3F; }
+  .browser .bar span { margin-left: 10px; font: 500 11px/1 "Archivo"; color: #A3A4A0; }
+  .browser .shot { position: absolute; inset: 34px 0 0; background: url("../render/frames/frame_0000.png") center/cover; }
+  .browser .copy { position: absolute; left: 24px; bottom: 24px; color: #ECEBE6; }
+  .browser .copy h4 { margin: 0 0 12px; font-size: 30px; font-weight: 560; font-stretch: 112%; letter-spacing: -0.035em; }
+  .pill { display: inline-flex; align-items: center; gap: 10px; background: var(--seal); color: var(--surface); border-radius: 999px; padding: 6px 6px 6px 16px; font-size: 13px; font-weight: 600; }
+  .pill b { width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,.18); display: grid; place-items: center; }
+  .pill svg { width: 14px; height: 14px; fill: currentColor; }
+  .browser .nav { white-space: nowrap; position: absolute; top: 48px; left: 50%; transform: translateX(-50%); display: flex; gap: 16px; align-items: center; padding: 7px 8px 7px 14px; border-radius: 999px; background: rgba(26,28,30,.72); border: 1px solid rgba(255,255,255,.1); font-size: 11px; color: #D9D8D3; }
+  .browser .nav img { width: 16px; height: 16px; }
+  .browser .nav .pill { padding: 4px 4px 4px 10px; font-size: 10px; gap: 6px; }
+  .browser .nav .pill b { width: 18px; height: 18px; }
+
+  /* 4 essence */
+  .essence { background: var(--seal); color: var(--surface); }
+  .essence h2 { margin: 0; font-size: 84px; line-height: .98; font-weight: 560; font-stretch: 112%; letter-spacing: -0.045em; padding: 40px; position: absolute; bottom: 36px; }
+  .essence .pg { color: rgba(251,251,249,.72); }
+  .essence .stamp { position: absolute; right: 30px; top: 30px; width: 74px; }
+
+  /* 5 color */
+  .colors { display: grid; grid-template-columns: 1.4fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  .sw { padding: 18px; display: flex; flex-direction: column; justify-content: flex-end; font: 500 11px/1.6 "JetBrains Mono", monospace; letter-spacing: .06em; text-transform: uppercase; }
+  .sw strong { font: 600 15px/1.2 "Archivo"; letter-spacing: -0.01em; text-transform: none; margin-bottom: 4px; }
+  .sw.seal { grid-row: span 2; background: var(--seal); color: var(--surface); }
+  .sw.iron { background: var(--iron); color: #ECEBE6; }
+  .sw.paper { background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); }
+  .sw.ink { background: var(--ink); color: #ECEBE6; }
+  .sw.muted { background: #E9E8E3; }
+
+  /* 6 type */
+  .type { padding: 30px; display: grid; grid-template-columns: 1fr auto; align-content: center; gap: 6px 20px; }
+  .type .aa { font-size: 150px; line-height: .85; font-weight: 560; font-stretch: 112%; letter-spacing: -0.05em; }
+  .type .cjk { font-family: "Noto Serif TC"; font-size: 96px; line-height: 1; color: var(--seal); writing-mode: vertical-rl; }
+  .type .mono { grid-column: span 2; font: 500 22px/1 "JetBrains Mono", monospace; letter-spacing: .04em; margin-top: 18px; }
+  .type .lbl { grid-column: span 2; font: 400 12px/1.6 "Archivo"; color: var(--muted); margin-top: 8px; }
+
+  /* 7 physical */
+  .phys { background: #111213 url("../render/stills/closed.png") center 58%/ 118% no-repeat; }
+  /* 8 image */
+  .img { background: #111213 url("../render/frames/frame_0179.png") 72% center/cover no-repeat; }
+  .img .cap { position: absolute; left: 22px; top: 22px; font: 560 22px/1.1 "Archivo"; font-stretch: 112%; letter-spacing: -0.03em; color: #ECEBE6; max-width: 200px; }
+
+  /* 9 system */
+  .sys { padding: 30px; display: grid; grid-template-columns: 1.15fr 1fr; gap: 22px; align-content: center; }
+  .sys .ticket { font-size: 12.5px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; grid-column: span 2; }
+  .chip { border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 500; border: 1px solid var(--line); background: var(--surface); }
+  .chip.on { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  .tags { display: flex; gap: 6px; grid-column: span 2; }
+  .tag { border-radius: 999px; padding: 4px 10px; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
+  .tag.v { background: #EDF3EC; color: #346538; } .tag.s { background: #FDEBEC; color: #9F2F2D; } .tag.p { background: #FBF3DB; color: #956400; }
+  .ticket { background: var(--surface); border: 1px solid var(--ink); font: 500 11px/1.9 "JetBrains Mono", monospace; letter-spacing: .06em; text-transform: uppercase; padding: 12px 14px; position: relative; }
+  .ticket .row { display: flex; justify-content: space-between; }
+  .ticket hr { border: 0; border-top: 1px dashed rgba(23,25,27,.4); margin: 6px 0; }
+  .ticket .stamp { position: absolute; left: 44%; bottom: -26px; width: 60px; transform: rotate(-8deg); }
+  .sys .pill { align-self: start; justify-self: start; font-size: 14px; padding: 7px 7px 7px 18px; }
+  .sys .pill b { width: 30px; height: 30px; }
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none"><symbol id="arr" viewBox="0 0 256 256"><path d="M198,64V168a6,6,0,0,1-12,0V78.48L68.24,196.24a6,6,0,0,1-8.48-8.48L177.52,70H88a6,6,0,0,1,0-12H192A6,6,0,0,1,198,64Z"/></symbol></svg>
+<div class="board">
+  <section class="p cover center">
+    <div class="lock"><img src="mark.svg" alt=""><span class="word">Wok Express</span></div>
+    <span class="pg">01 Mark</span>
+  </section>
+
+  <section class="p cons center">
+    <svg viewBox="0 0 100 100">
+      <g stroke="rgba(23,25,27,.16)" stroke-width=".3" fill="none">
+        <path d="M0 10H100M0 20H100M0 30H100M0 40H100M0 50H100M0 60H100M0 70H100M0 80H100M0 90H100M10 0V100M20 0V100M30 0V100M40 0V100M50 0V100M60 0V100M70 0V100M80 0V100M90 0V100"/>
+      </g>
+      <rect width="100" height="100" fill="#C43A25" opacity=".92"/>
+      <path d="M18 55 A32 32 0 0 0 82 55 Z" fill="#F3F2EE"/>
+      <path d="M80 51.6 L93.2 47.4 L94.8 52.6 L81.2 56.4 Z" fill="#F3F2EE"/>
+      <path d="M50 47 C 41.5 39.5, 58.5 31.5, 50 22.5 C 44.5 16.5, 50 8, 50 0" fill="none" stroke="#F3F2EE" stroke-width="7"/>
+      <g stroke="#17191B" stroke-width=".35" fill="none" stroke-dasharray="1.2 1.2">
+        <circle cx="50" cy="55" r="32"/>
+        <path d="M-8 55H108M50 -8V108"/>
+        <path d="M41.5 39.5L50 47M58.5 31.5L50 22.5M44.5 16.5L50 22.5"/>
+      </g>
+      <g fill="#17191B"><circle cx="50" cy="55" r=".9"/><circle cx="41.5" cy="39.5" r=".9"/><circle cx="58.5" cy="31.5" r=".9"/><circle cx="44.5" cy="16.5" r=".9"/></g>
+    </svg>
+    <div class="note">Seal 1:1<br>Bowl r = 0.32<br>Steam breaks the frame</div>
+    <span class="pg">02 Construction</span>
+  </section>
+
+  <section class="p">
+    <div class="browser">
+      <div class="bar"><i></i><i></i><i></i><span>Wok Express</span></div>
+      <div class="shot"></div>
+      <div class="nav"><img src="mark.svg" alt=""><span>Menu</span><span>How it works</span><span>FAQ</span><span class="pill">Order pickup<b><svg><use href="#arr"/></svg></b></span></div>
+      <div class="copy"><h4>Wok hei, to go.</h4><span class="pill">Order pickup<b><svg><use href="#arr"/></svg></b></span></div>
+    </div>
+    <span class="pg">03 Web</span>
+  </section>
+
+  <section class="p essence">
+    <img class="stamp" src="seal-chars-paper.svg" alt="">
+    <h2>Wok hei,<br>to go.</h2>
+    <span class="pg">04 Essence</span>
+  </section>
+
+  <section class="p colors">
+    <div class="sw seal"><strong>Seal</strong>#C43A25<br>dark #E0563E</div>
+    <div class="sw paper"><strong>Rice paper</strong>#F3F2EE</div>
+    <div class="sw iron"><strong>Wok iron</strong>#111213</div>
+    <div class="sw ink"><strong>Ink</strong>#17191B</div>
+    <div class="sw muted"><strong>Stone</strong>#E9E8E3</div>
+  </section>
+
+  <section class="p type">
+    <div class="aa">Aa</div>
+    <div class="cjk">鑊氣</div>
+    <div class="mono">READY IN 14 MIN · $14.50</div>
+    <div class="lbl">Archivo, width 112, weight 560. Noto Serif TC 900 for the seal. JetBrains Mono for tickets.</div>
+    <span class="pg">06 Type</span>
+  </section>
+
+  <section class="p phys dark"><span class="pg">07 Packaging</span></section>
+
+  <section class="p img dark">
+    <div class="cap">Warm light. Dark iron. Steam.</div>
+    <span class="pg">08 Image</span>
+  </section>
+
+  <section class="p sys">
+    <div class="chips"><span class="chip on">Egg noodles</span><span class="chip">Wide rice noodles</span><span class="chip">Jasmine fried rice</span></div>
+    <div class="tags"><span class="tag v">Vegan</span><span class="tag s">Spicy</span><span class="tag p">Peanuts</span></div>
+    <div class="ticket">
+      <div class="row"><span>[ Wok Express ]</span><span>No. 0417</span></div>
+      <hr>
+      <div class="row"><span>Egg noodles</span><span>11.50</span></div>
+      <div class="row"><span>Beef</span><span>3.00</span></div>
+      <hr>
+      <div class="row"><span>Total</span><span>14.50</span></div>
+      <img class="stamp" src="seal-chars.svg" alt="">
+    </div>
+    <span class="pill">Order pickup<b><svg><use href="#arr"/></svg></b></span>
+    <span class="pg">09 System</span>
+  </section>
+</div>
+</body>
+</html>

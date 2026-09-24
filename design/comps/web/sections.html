@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wok Express section comps</title>
+<style>
+  @font-face { font-family: "Archivo"; src: url("../../../site/assets/fonts/archivo-latin.woff2") format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; }
+  @font-face { font-family: "JetBrains Mono"; src: url("../../../site/assets/fonts/jetbrains-mono-latin.woff2") format("woff2"); font-weight: 400 800; }
+  @font-face { font-family: "Noto Serif TC"; src: url("../../../site/assets/fonts/noto-serif-tc-900-subset.woff2") format("woff2"); font-weight: 900; }
+  :root {
+    --bg: #F3F2EE; --surface: #FBFBF9; --tint: #E9E8E3; --ink: #17191B; --muted: #5E6166; --line: rgba(23,25,27,.12);
+    --seal: #C43A25; --on-seal: #FBFBF9; --iron: #111213;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #888; font-family: "Archivo", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  .ab { width: 1600px; height: 900px; background: var(--bg); position: relative; overflow: hidden; margin-bottom: 40px; }
+  .ab.tall { height: 1000px; }
+  .h1 { font-size: 104px; line-height: .96; font-weight: 560; font-stretch: 112%; letter-spacing: -0.045em; margin: 0; }
+  .h2 { font-size: 60px; line-height: 1.02; font-weight: 560; font-stretch: 112%; letter-spacing: -0.04em; margin: 0; }
+  .lead { font-size: 20px; line-height: 1.55; color: var(--muted); max-width: 46ch; margin: 0; }
+  .eyebrow { display: inline-flex; font: 600 11px/1 "Archivo"; letter-spacing: .18em; text-transform: uppercase; color: var(--seal); padding: 7px 12px; border-radius: 999px; background: rgba(196,58,37,.08); }
+  .btn { display: inline-flex; align-items: center; gap: 12px; height: 54px; padding: 0 7px 0 24px; border-radius: 999px; background: var(--seal); color: var(--on-seal); font: 600 16px/1 "Archivo"; white-space: nowrap; }
+  .btn b { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.18); display: grid; place-items: center; }
+  .btn svg { width: 16px; height: 16px; fill: currentColor; }
+  .link { font: 600 16px/1 "Archivo"; color: inherit; text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+  .mono { font-family: "JetBrains Mono", monospace; }
+  .shell { padding: 8px; border-radius: 30px; background: rgba(23,25,27,.05); box-shadow: inset 0 0 0 1px var(--line); }
+  .core { border-radius: 22px; overflow: hidden; height: 100%; box-shadow: inset 0 1px 0 rgba(255,255,255,.2); }
+  .grain::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .045; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+  /* 1 hero */
+  .hero .film { position: absolute; inset: 14px; border-radius: 30px; overflow: hidden; background: #111213 url("../../render/frames/frame_0000.png") center/cover; }
+  .hero .film::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(17,18,19,.78) 0%, rgba(17,18,19,.35) 42%, rgba(17,18,19,0) 60%); }
+  .nav { position: absolute; top: 34px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 30px; padding: 8px 8px 8px 18px; border-radius: 999px; background: rgba(26,28,30,.62); border: 1px solid rgba(255,255,255,.1); color: #ECEBE6; font-size: 15px; font-weight: 500; white-space: nowrap; z-index: 2; }
+  .nav .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-stretch: 112%; letter-spacing: -0.02em; font-size: 16px; }
+  .nav .brand img { width: 26px; height: 26px; }
+  .nav .btn { height: 42px; font-size: 14px; padding-left: 18px; }
+  .nav .btn b { width: 30px; height: 30px; }
+  .hero .copy { position: absolute; left: 86px; bottom: 90px; color: #ECEBE6; z-index: 2; }
+  .hero .copy .lead { color: rgba(236,235,230,.78); margin: 24px 0 34px; max-width: 40ch; }
+  .hero .ctas { display: flex; align-items: center; gap: 28px; }
+
+  /* 2 story */
+  .story .media { position: absolute; left: 80px; top: 90px; width: 820px; height: 720px; }
+  .story .media .core { background: #111213 url("../../../site/assets/img/box-side.jpg") 55% 60%/cover; }
+  .story .text { position: absolute; left: 990px; top: 250px; width: 500px; }
+  .story .text .h2 { margin: 26px 0 26px; font-size: 52px; }
+  .story .cjk { position: absolute; right: -40px; top: -60px; font: 900 400px/0.95 "Noto Serif TC"; color: rgba(23,25,27,.045); writing-mode: vertical-rl; }
+
+  /* 3 menu */
+  .menu .head { position: absolute; left: 80px; top: 72px; }
+  .menu .head .lead { margin-top: 18px; max-width: 52ch; }
+  .bento { position: absolute; left: 80px; right: 80px; top: 280px; bottom: 70px; display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1px; background: var(--ink); border: 1px solid var(--ink); }
+  .cell { background: var(--bg); padding: 24px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+  .cell h3 { margin: 0 0 6px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+  .cell p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--muted); max-width: 34ch; }
+  .cell .price { position: absolute; top: 22px; right: 22px; font: 500 15px/1 "JetBrains Mono"; }
+  .cell .zh { position: absolute; top: 22px; left: 24px; font: 900 15px/1 "Noto Serif TC"; letter-spacing: .1em; color: var(--muted); }
+  .cell .big { position: absolute; right: 18px; top: 34px; font: 900 150px/1 "Noto Serif TC"; color: rgba(23,25,27,.08); }
+  .cell.feature { grid-row: span 2; color: #ECEBE6; background: #111213 url("../../../site/assets/img/box-open-top.jpg") center 42%/cover; }
+  .cell.feature::before { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(17,18,19,.88), rgba(17,18,19,0) 55%); }
+  .cell.feature > * { position: relative; }
+  .cell.feature .price, .cell.feature .zh { position: absolute; color: #ECEBE6; }
+  .cell.feature h3 { font-size: 34px; }
+  .cell.feature p { color: rgba(236,235,230,.75); }
+  .cell.seal { background: #F6DCD6; }
+  .cell.seal .big { color: rgba(196,58,37,.13); top: 34px; }
+  .cell.iron { background: var(--iron); color: #ECEBE6; }
+  .cell.iron p, .cell.iron .zh { color: #A3A4A0; }
+  .cell.iron .big { color: rgba(236,235,230,.07); }
+  .tags { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tag { border-radius: 999px; padding: 4px 10px; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; }
+  .tag.v { background: #EDF3EC; color: #346538; } .tag.s { background: #FDEBEC; color: #9F2F2D; } .tag.p { background: #FBF3DB; color: #956400; }
+  .cell.feature { grid-column: 1; grid-row: 1 / span 3; }
+  .bento .c2 { grid-column: 2; grid-row: 1; } .bento .c3 { grid-column: 3; grid-row: 1; }
+  .bento .c4 { grid-column: 2; grid-row: 2; } .bento .c5 { grid-column: 3; grid-row: 2; }
+  .menu.tall .bento { grid-template-rows: 1fr 1fr 0.8fr; }
+  .bento .c6 { grid-column: 2 / span 2; grid-row: 3; flex-direction: row; align-items: flex-end; justify-content: space-between; }
+  .bento .c6 > div { max-width: 60%; }
+
+  /* 4 order */
+  .order .head { position: absolute; left: 80px; top: 72px; }
+  .order .head .lead { margin-top: 16px; }
+  .opts { position: absolute; left: 80px; top: 250px; width: 800px; display: grid; gap: 26px; }
+  .opt .gl { font: 600 14px/1 "Archivo"; margin-bottom: 12px; display: flex; gap: 12px; align-items: baseline; }
+  .opt .gl span { font: 500 13px/1 "JetBrains Mono"; color: var(--muted); }
+  .chips { display: flex; gap: 10px; flex-wrap: wrap; }
+  .chip { height: 44px; display: inline-flex; align-items: center; padding: 0 20px; border-radius: 999px; font-size: 15px; font-weight: 500; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+  .chip.on { background: var(--ink); color: var(--surface); box-shadow: none; }
+  .chip small { font: 500 12px/1 "JetBrains Mono"; margin-left: 8px; opacity: .65; }
+  .form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 10px; padding-top: 28px; border-top: 1px solid var(--line); }
+  .field label { display: block; font: 600 13px/1 "Archivo"; margin-bottom: 8px; }
+  .field .in { height: 50px; border-radius: 12px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); display: flex; align-items: center; padding: 0 16px; font-size: 15px; color: var(--muted); }
+  .ticketwrap { position: absolute; right: 80px; top: 120px; width: 520px; }
+  .ticket { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--ink); padding: 26px 28px 30px; font: 500 14px/2.1 "JetBrains Mono"; letter-spacing: .06em; text-transform: uppercase; position: relative; }
+  .ticket .r { display: flex; justify-content: space-between; }
+  .ticket .r span:first-child { color: var(--muted); }
+  .ticket hr { border: 0; border-top: 1px dashed rgba(23,25,27,.4); margin: 12px 0; }
+  .ticket .tot { font-size: 22px; font-weight: 600; }
+  .ticket .ready { margin-top: 10px; color: var(--seal); }
+  .ticketwrap .btn { margin-top: 22px; width: 100%; justify-content: space-between; }
+  .ticketwrap .help { margin-top: 14px; font-size: 13px; color: var(--muted); }
+
+  /* 5 how */
+  .how .num { position: absolute; left: 50px; top: 40px; font: 560 620px/0.8 "Archivo"; font-stretch: 100%; letter-spacing: -0.07em; color: var(--ink); }
+  .how .num-cap { position: absolute; left: 96px; top: 560px; font: 500 15px/1 "JetBrains Mono"; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .how .right { position: absolute; left: 900px; top: 170px; width: 600px; }
+  .step { padding: 30px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 170px 1fr; gap: 20px; }
+  .step h3 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+  .step p { margin: 0; font-size: 17px; line-height: 1.55; color: var(--muted); }
+  .how .right .h2 { margin-bottom: 42px; }
+
+  /* 6 app */
+  .app { background: #EAE9E4; }
+  .app .head { position: absolute; left: 0; right: 0; top: 80px; text-align: center; }
+  .app .head .h2 { margin: 22px 0 18px; }
+  .app .head .lead { margin: 0 auto; }
+  .phones { position: absolute; left: 0; right: 0; top: 390px; display: flex; justify-content: center; gap: 30px; }
+  .phones img { width: 300px; filter: drop-shadow(0 40px 50px rgba(23,25,27,.22)); }
+  .phones img:nth-child(1) { transform: translateY(70px) rotate(-3deg); }
+  .phones img:nth-child(3) { transform: translateY(90px) rotate(3deg); }
+
+  /* 7 promises */
+  .prom .left { position: absolute; left: 80px; top: 110px; width: 520px; }
+  .prom .left .h2 { font-size: 72px; }
+  .prom .left img { width: 84px; margin-top: 40px; }
+  .prom .list { position: absolute; left: 760px; right: 80px; top: 110px; }
+  .pr { padding: 34px 0; display: grid; grid-template-columns: 280px 1fr; gap: 30px; align-items: baseline; }
+  .pr + .pr { border-top: 1px solid var(--line); }
+  .pr h3 { margin: 0; font-size: 28px; font-weight: 560; font-stretch: 112%; letter-spacing: -0.03em; }
+  .pr p { margin: 0; font-size: 17px; line-height: 1.55; color: var(--muted); }
+
+  /* 8 faq */
+  .faq .col { position: absolute; left: 50%; transform: translateX(-50%); top: 100px; width: 820px; }
+  .faq .h2 { text-align: center; margin-bottom: 50px; }
+  .q { border-bottom: 1px solid var(--line); padding: 26px 0; }
+  .q .qh { display: flex; justify-content: space-between; font-size: 21px; font-weight: 600; letter-spacing: -0.015em; }
+  .q .qh span { font: 400 26px/1 "Archivo"; color: var(--muted); }
+  .q p { margin: 14px 0 0; font-size: 17px; line-height: 1.6; color: var(--muted); max-width: 62ch; }
+
+  /* 9 final */
+  .final .img { position: absolute; left: 14px; right: 14px; top: 14px; height: 620px; border-radius: 30px; background: #111213 url("../../render/frames/frame_0179.png") right 30% top 42%/auto 150% no-repeat; overflow: hidden; }
+  .final .img::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(17,18,19,.94) 0%, rgba(17,18,19,.82) 45%, rgba(17,18,19,.1) 75%); }
+  .final .copy { position: absolute; left: 110px; top: 190px; width: 720px; color: #ECEBE6; }
+  .final .copy .h2 { font-size: 84px; }
+  .final .copy p { margin: 18px 0 30px; color: rgba(236,235,230,.75); font-size: 18px; }
+  .foot { position: absolute; left: 80px; right: 80px; bottom: 50px; display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 40px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .foot .brand { display: flex; align-items: center; gap: 10px; font: 600 18px/1 "Archivo"; font-stretch: 112%; letter-spacing: -0.03em; color: var(--ink); }
+  .foot .brand img { width: 30px; }
+  .foot nav { display: flex; gap: 22px; color: var(--ink); font-weight: 500; }
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none"><symbol id="arr" viewBox="0 0 256 256"><path d="M198,64V168a6,6,0,0,1-12,0V78.48L68.24,196.24a6,6,0,0,1-8.48-8.48L177.52,70H88a6,6,0,0,1,0-12H192A6,6,0,0,1,198,64Z"/></symbol></svg>
+
+<!-- 1 -->
+<section class="ab hero" data-shot="section-01-hero">
+  <div class="film"></div>
+  <nav class="nav"><span class="brand"><img src="../../../site/assets/img/mark.svg" alt="">Wok Express</span><span>Menu</span><span>How it works</span><span>FAQ</span><span class="btn">Order pickup<b><svg><use href="#arr"/></svg></b></span></nav>
+  <div class="copy">
+    <h1 class="h1">Wok hei,<br>to go.</h1>
+    <p class="lead">Noodles and rice fired one order at a time, packed to stay crisp, and ready when you walk in.</p>
+    <div class="ctas"><span class="btn">Order pickup<b><svg><use href="#arr"/></svg></b></span><span class="link">See the menu</span></div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="ab story grain" data-shot="section-02-story">
+  <div class="cjk">鑊氣</div>
+  <div class="shell media"><div class="core"></div></div>
+  <div class="text">
+    <span class="eyebrow">The breath of the wok</span>
+    <h2 class="h2">Most takeout loses the best part on the way home.</h2>
+    <p class="lead">Wok hei is the smoky, just-seared taste you only get from a very hot wok. It lasts minutes, not hours. So we cook every box to order and pack it to breathe, not sweat.</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="ab tall menu" data-shot="section-03-menu">
+  <div class="head"><h2 class="h2">What's in the wok.</h2><p class="lead">Six dishes, each built for the trip home. Crisp things stay crisp. Sauced things stay glossy.</p></div>
+  <div class="bento">
+    <div class="cell feature"><span class="zh">乾炒牛河</span><span class="price">$16.50</span><h3>Beef chow fun</h3><p>Wide rice noodles, seared flank, bean sprouts, scallion, dark soy.</p></div>
+    <div class="cell seal c2"><span class="zh">油潑麵</span><span class="price">$13.75</span><span class="big">辣</span><div class="tags"><span class="tag v">Vegan</span><span class="tag s">Spicy</span></div><h3>Hot oil noodles</h3><p>Wide wheat noodles, chili, garlic and scallion, finished with sizzling oil.</p></div>
+    <div class="cell c3"><span class="zh">椒鹽豆腐</span><span class="price">$12.25</span><span class="big">豆</span><div class="tags"><span class="tag v">Vegan</span></div><h3>Salt and pepper tofu</h3><p>Crisp tofu, fried garlic, green chili. Sauce on the side, always.</p></div>
+    <div class="cell c4"><span class="zh">叉燒炒飯</span><span class="price">$14.25</span><span class="big">飯</span><h3>Char siu fried rice</h3><p>Roast pork, egg, peas and scallion, in rice cooked a day ahead so it fries dry.</p></div>
+    <div class="cell iron c5"><span class="zh">宮保雞丁</span><span class="price">$15.50</span><span class="big">宮</span><div class="tags"><span class="tag s">Spicy</span><span class="tag p">Peanuts</span></div><h3>Kung pao chicken</h3><p>Chicken thigh, peanuts, dried chili, Sichuan pepper.</p></div>
+    <div class="cell c6"><div><span class="zh" style="position:static;display:block;margin-bottom:14px">韭菜豬肉鍋貼</span><h3>Pork and chive potstickers</h3><p>Eight, pan-fried, crisp side up. Black vinegar to dip.</p></div><span class="mono" style="font-size:15px">$10.50</span></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="ab order" data-shot="section-04-order">
+  <div class="head"><h2 class="h2">Build your box.</h2><p class="lead">Pick a base, a protein and a sauce. Your ticket updates as you go.</p></div>
+  <div class="opts">
+    <div class="opt"><div class="gl">Base <span>$11.50</span></div><div class="chips"><span class="chip on">Egg noodles</span><span class="chip">Wide rice noodles</span><span class="chip">Jasmine fried rice</span></div></div>
+    <div class="opt"><div class="gl">Protein</div><div class="chips"><span class="chip on">Beef<small>+3.00</small></span><span class="chip">Chicken<small>+2.00</small></span><span class="chip">Tofu<small>+0.00</small></span><span class="chip">Shrimp<small>+3.50</small></span></div></div>
+    <div class="opt"><div class="gl">Sauce</div><div class="chips"><span class="chip on">Black bean</span><span class="chip">Garlic chili</span><span class="chip">Ginger scallion</span></div></div>
+    <div class="opt"><div class="gl">Heat</div><div class="chips"><span class="chip">None</span><span class="chip">Mild</span><span class="chip on">Hot</span><span class="chip">Wok-fire</span></div></div>
+    <div class="form"><div class="field"><label>Name</label><div class="in">Priya</div></div><div class="field"><label>Mobile number</label><div class="in">(905) 555-0142</div></div><div class="field"><label>Pickup</label><div class="in">As soon as it's ready</div></div></div>
+  </div>
+  <div class="ticketwrap">
+    <div class="ticket">
+      <div class="r"><span style="color:var(--ink)">[ Wok Express ]</span><span>No. 0417</span></div>
+      <hr>
+      <div class="r"><span>Base</span><span>Egg noodles 11.50</span></div>
+      <div class="r"><span>Protein</span><span>Beef 3.00</span></div>
+      <div class="r"><span>Sauce</span><span>Black bean 0.00</span></div>
+      <div class="r"><span>Heat</span><span>Hot</span></div>
+      <hr>
+      <div class="r tot"><span style="color:var(--ink)">Total</span><span>14.50</span></div>
+      <div class="ready">Ready in about 14 min</div>
+    </div>
+    <span class="btn">Place order<b><svg><use href="#arr"/></svg></b></span>
+    <p class="help">We only use your number to text you when your box is bagged.</p>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="ab how" data-shot="section-05-how">
+  <div class="num">15</div>
+  <div class="num-cap">minutes, give or take</div>
+  <div class="right">
+    <h2 class="h2">Ready when you walk in.</h2>
+    <div class="step"><h3>Order.</h3><p>Build your box here. The ready time shows before you pay.</p></div>
+    <div class="step"><h3>We fire it.</h3><p>Your ticket goes straight to a hot wok. One order per wok, every time.</p></div>
+    <div class="step"><h3>Pick it up.</h3><p>We text you when it's bagged. Walk in, grab it, go.</p></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="ab app grain" data-shot="section-06-app">
+  <div class="head"><span class="eyebrow">The app</span><h2 class="h2">Your usual, two taps away.</h2><p class="lead">Save a box, reorder it in seconds, and watch your ticket count down to pickup. Coming to iOS and Android.</p></div>
+  <div class="phones">
+    <img src="../mobile/phones/phone-1-menu.png" alt="">
+    <img src="../mobile/phones/phone-2-build.png" alt="">
+    <img src="../mobile/phones/phone-3-ticket.png" alt="">
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="ab prom" data-shot="section-07-promises">
+  <div class="left"><h2 class="h2">Four rules we cook by.</h2><img src="../../../site/assets/img/seal-chars.svg" alt=""></div>
+  <div class="list">
+    <div class="pr"><h3>Crisp stays crisp.</h3><p>Vented boxes, and sauce packed on the side for anything fried.</p></div>
+    <div class="pr"><h3>One wok, one order.</h3><p>Nothing is batch-cooked or kept warm under a lamp.</p></div>
+    <div class="pr"><h3>Checked twice.</h3><p>Every bag is read back against your ticket before it's sealed.</p></div>
+    <div class="pr"><h3>Ready means ready.</h3><p>You get a text when it's bagged, not while it's still in the wok.</p></div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="ab faq" data-shot="section-08-faq">
+  <div class="col">
+    <h2 class="h2">Before you order.</h2>
+    <div class="q"><div class="qh">How long does an order take?<span>&minus;</span></div><p>Most boxes are ready in 12 to 18 minutes. Your exact ready time shows on the ticket before you pay.</p></div>
+    <div class="q"><div class="qh">Do you deliver?<span>+</span></div></div>
+    <div class="q"><div class="qh">What about allergies?<span>+</span></div></div>
+    <div class="q"><div class="qh">What's vegan?<span>+</span></div></div>
+    <div class="q"><div class="qh">Can I order for a group?<span>+</span></div></div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="ab final" data-shot="section-09-final">
+  <div class="img"></div>
+  <div class="copy"><h2 class="h2">The wok is already hot.</h2><p>Open daily, 11:30 am to 10 pm. Pickup only.</p><span class="btn">Order pickup<b><svg><use href="#arr"/></svg></b></span></div>
+  <div class="foot">
+    <div><span class="brand"><img src="../../../site/assets/img/mark.svg" alt="">Wok Express</span></div>
+    <nav><span>Menu</span><span>How it works</span><span>FAQ</span><span>Order pickup</span></nav>
+    <p style="margin:0">Wok Express is a concept brand. Every image on this page is a 3D render, and the menu, prices and app are samples. © 2026 Wok Express</p>
+  </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page not found | Wok Express</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#F3F2EE" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111213" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="assets/img/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('wok-theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    .nf { min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: var(--gutter); text-align: center; }
+    .nf-inner { max-width: 560px; display: grid; justify-items: center; gap: 22px; }
+    .nf-seal { width: 88px; transform: rotate(-4deg); }
+    .nf .lead { margin: 0 auto; }
+  </style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-arrow-up-right" viewBox="0 0 256 256"><path d="M198,64V168a6,6,0,0,1-12,0V78.48L68.24,196.24a6,6,0,0,1-8.48-8.48L177.52,70H88a6,6,0,0,1,0-12H192A6,6,0,0,1,198,64Z"/></symbol></svg>
+<main class="nf">
+  <div class="nf-inner">
+    <img class="nf-seal" src="assets/img/seal-chars.svg" width="88" height="88" alt="The 鑊氣 seal">
+    <h1 class="h2">This page isn't on the menu.</h1>
+    <p class="lead">The link may be old or mistyped. The wok is still hot on the home page.</p>
+    <a class="btn" href="./">
+      Back to Wok Express
+      <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></span>
+    </a>
+  </div>
+</main>
+</body>
+</html>

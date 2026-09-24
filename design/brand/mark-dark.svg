@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Wok Express">
+  <rect width="100" height="100" fill="#E0563E"/>
+  <path d="M18 55 A32 32 0 0 0 82 55 Z" fill="#111213"/>
+  <path d="M80 51.6 L93.2 47.4 L94.8 52.6 L81.2 56.4 Z" fill="#111213"/>
+  <path d="M50 47 C 41.5 39.5, 58.5 31.5, 50 22.5 C 44.5 16.5, 50 8, 50 0" fill="none" stroke="#111213" stroke-width="7"/>
+</svg>

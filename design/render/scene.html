@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wok Express hero scene</title>
+<style>
+  @font-face { font-family: "Archivo"; src: url("/site/assets/fonts/archivo-latin.woff2") format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; }
+  @font-face { font-family: "Noto Serif TC"; src: url("/site/assets/fonts/noto-serif-tc-900-subset.woff2") format("woff2"); font-weight: 900; }
+  html, body { margin: 0; background: #0F1011; overflow: hidden; }
+  canvas { display: block; }
+</style>
+<script type="importmap">
+  { "imports": { "three": "/design/render/node_modules/three/build/three.module.js",
+                 "three/addons/": "/design/render/node_modules/three/examples/jsm/" } }
+</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+const params = new URLSearchParams(location.search);
+const WIDTH = Number(params.get('w') || 1920);
+const HEIGHT = Number(params.get('h') || 1080);
+const DURATION = 6; // seconds of film time
+
+// ---------- palette ----------
+const C = {
+  iron: new THREE.Color('#0F1011'),
+  counter: new THREE.Color('#1C1D1F'),
+  paper: new THREE.Color('#F2F0EA'),
+  seal: '#C43A25',
+  sealPaper: '#F3F2EE',
+  noodleA: new THREE.Color('#C98A43'),
+  noodleB: new THREE.Color('#9C5E24'),
+  scallion: new THREE.Color('#6E9E36'),
+  scallionPale: new THREE.Color('#B9CF7A'),
+  chili: new THREE.Color('#BC3420'),
+  sesame: new THREE.Color('#EADFBF'),
+  beef: new THREE.Color('#3B1E12'),
+  sprout: new THREE.Color('#EDE6D2'),
+};
+
+// ---------- deterministic random ----------
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rand = mulberry32(20260924);
+const rr = (a, b) => a + (b - a) * rand();
+
+const clamp01 = (x) => Math.min(1, Math.max(0, x));
+const smooth = (e0, e1, x) => { const t = clamp01((x - e0) / (e1 - e0)); return t * t * (3 - 2 * t); };
+const smoother = (e0, e1, x) => { const t = clamp01((x - e0) / (e1 - e0)); return t * t * t * (t * (t * 6 - 15) + 10); };
+const lerp = (a, b, t) => a + (b - a) * t;
+
+// ---------- renderer ----------
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(WIDTH, HEIGHT);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.AgXToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = C.iron.clone();
+scene.fog = new THREE.Fog(C.iron, 6.5, 13);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.32;
+
+const camera = new THREE.PerspectiveCamera(30, WIDTH / HEIGHT, 0.05, 40);
+
+// ---------- canvas textures ----------
+function noiseCanvas(size, base, amp, seed, grain = 1) {
+  const r = mulberry32(seed);
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = size;
+  const ctx = cv.getContext('2d');
+  const img = ctx.createImageData(size, size);
+  for (let i = 0; i < size * size; i++) {
+    const n = (r() - 0.5) * amp;
+    const fiber = (i % size) % (7 * grain) === 0 ? amp * 0.2 * (r() - 0.5) : 0;
+    const v = Math.max(0, Math.min(255, base + n + fiber));
+    img.data[i * 4] = v; img.data[i * 4 + 1] = v; img.data[i * 4 + 2] = v; img.data[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  return cv;
+}
+
+const paperTex = new THREE.CanvasTexture(noiseCanvas(512, 246, 10, 11));
+paperTex.wrapS = paperTex.wrapT = THREE.RepeatWrapping;
+paperTex.repeat.set(2, 2);
+paperTex.colorSpace = THREE.SRGBColorSpace;
+
+const counterTex = new THREE.CanvasTexture(noiseCanvas(512, 120, 9, 29, 3));
+counterTex.wrapS = counterTex.wrapT = THREE.RepeatWrapping;
+counterTex.repeat.set(5, 5);
+counterTex.colorSpace = THREE.SRGBColorSpace;
+
+const counterRough = new THREE.CanvasTexture(noiseCanvas(256, 150, 30, 31));
+counterRough.wrapS = counterRough.wrapT = THREE.RepeatWrapping;
+counterRough.repeat.set(14, 14);
+
+function sealTexture() {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 512;
+  const ctx = cv.getContext('2d');
+  ctx.scale(5.12, 5.12);
+  ctx.fillStyle = C.seal; ctx.fillRect(0, 0, 100, 100);
+  ctx.fillStyle = C.sealPaper;
+  ctx.fill(new Path2D('M18 55 A32 32 0 0 0 82 55 Z'));
+  ctx.fill(new Path2D('M80 51.6 L93.2 47.4 L94.8 52.6 L81.2 56.4 Z'));
+  ctx.strokeStyle = C.sealPaper; ctx.lineWidth = 7;
+  ctx.stroke(new Path2D('M50 47 C 41.5 39.5, 58.5 31.5, 50 22.5 C 44.5 16.5, 50 8, 50 0'));
+  const t = new THREE.CanvasTexture(cv);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+
+async function textTexture(lines, opts) {
+  const { w, h, font, color, size, spacing = 0, vertical = false } = opts;
+  await document.fonts.load(`${size}px "${font}"`);
+  const cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `${opts.weight || 900} ${size}px "${font}"`;
+  if (vertical) {
+    const chars = [...lines];
+    chars.forEach((ch, i) => ctx.fillText(ch, w / 2, size * 0.6 + i * (size * 1.05)));
+  } else {
+    if ('letterSpacing' in ctx) ctx.letterSpacing = `${spacing}px`;
+    ctx.fillText(lines, w / 2, h / 2);
+  }
+  const t = new THREE.CanvasTexture(cv);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+
+// ---------- materials ----------
+const paperMat = new THREE.MeshStandardMaterial({ color: C.paper, map: paperTex, roughness: 0.82, metalness: 0, side: THREE.DoubleSide });
+const paperInnerMat = new THREE.MeshStandardMaterial({ color: new THREE.Color('#E7E3DA'), map: paperTex, roughness: 0.9, side: THREE.DoubleSide });
+const counterMat = new THREE.MeshStandardMaterial({ color: C.counter, map: counterTex, roughnessMap: counterRough, roughness: 0.62, metalness: 0.15 });
+const wireMat = new THREE.MeshStandardMaterial({ color: new THREE.Color('#B9BDC2'), metalness: 1, roughness: 0.28 });
+
+// ---------- box ----------
+const W_TOP = 1.0, D_TOP = 0.84, W_BOT = 0.74, D_BOT = 0.6, H = 1.05;
+const box = new THREE.Group();
+scene.add(box);
+
+function quad(a, b, c, d) {
+  const g = new THREE.BufferGeometry();
+  const p = new Float32Array([...a, ...b, ...c, ...a, ...c, ...d]);
+  const uv = new Float32Array([0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1]);
+  g.setAttribute('position', new THREE.BufferAttribute(p, 3));
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  g.computeVertexNormals();
+  return g;
+}
+{
+  const wb = W_BOT / 2, db = D_BOT / 2, wt = W_TOP / 2, dt = D_TOP / 2;
+  const faces = [
+    quad([-wb, 0, db], [wb, 0, db], [wt, H, dt], [-wt, H, dt]),     // front
+    quad([wb, 0, -db], [-wb, 0, -db], [-wt, H, -dt], [wt, H, -dt]), // back
+    quad([wb, 0, db], [wb, 0, -db], [wt, H, -dt], [wt, H, dt]),     // right
+    quad([-wb, 0, -db], [-wb, 0, db], [-wt, H, dt], [-wt, H, -dt]), // left
+    quad([-wb, 0.004, -db], [wb, 0.004, -db], [wb, 0.004, db], [-wb, 0.004, db]), // floor
+  ];
+  const body = new THREE.Mesh(mergeGeometries(faces), paperMat);
+  body.castShadow = true; body.receiveShadow = true;
+  box.add(body);
+  // inner skin, slightly inset, darker so the inside reads as a cavity
+  const s = 0.985;
+  const inner = [
+    quad([-wb * s, 0.01, db * s], [wb * s, 0.01, db * s], [wt * s, H - 0.002, dt * s], [-wt * s, H - 0.002, dt * s]),
+    quad([wb * s, 0.01, -db * s], [-wb * s, 0.01, -db * s], [-wt * s, H - 0.002, -dt * s], [wt * s, H - 0.002, -dt * s]),
+    quad([wb * s, 0.01, db * s], [wb * s, 0.01, -db * s], [wt * s, H - 0.002, -dt * s], [wt * s, H - 0.002, dt * s]),
+    quad([-wb * s, 0.01, -db * s], [-wb * s, 0.01, db * s], [-wt * s, H - 0.002, dt * s], [-wt * s, H - 0.002, -dt * s]),
+  ];
+  const innerMesh = new THREE.Mesh(mergeGeometries(inner), paperInnerMat);
+  innerMesh.receiveShadow = true;
+  box.add(innerMesh);
+  // rim: thin strips that give the paperboard a visible edge
+  const rimMat = paperMat;
+  const t = 0.012;
+  const rims = [
+    new THREE.BoxGeometry(W_TOP + t, t * 0.8, t).translate(0, H, dt),
+    new THREE.BoxGeometry(W_TOP + t, t * 0.8, t).translate(0, H, -dt),
+    new THREE.BoxGeometry(t, t * 0.8, D_TOP + t).translate(wt, H, 0),
+    new THREE.BoxGeometry(t, t * 0.8, D_TOP + t).translate(-wt, H, 0),
+  ];
+  const rim = new THREE.Mesh(mergeGeometries(rims), rimMat);
+  rim.castShadow = true;
+  box.add(rim);
+}
+
+// flaps
+function flapGeometry(bottomW, topW, height, notch) {
+  const s = new THREE.Shape();
+  s.moveTo(-bottomW / 2, 0);
+  s.lineTo(bottomW / 2, 0);
+  s.lineTo(topW / 2, height);
+  if (notch) {
+    s.lineTo(0.06, height);
+    s.lineTo(0.0, height - 0.05);
+    s.lineTo(-0.06, height);
+  }
+  s.lineTo(-topW / 2, height);
+  s.lineTo(-bottomW / 2, 0);
+  const g = new THREE.ExtrudeGeometry(s, { depth: 0.008, bevelEnabled: false });
+  g.translate(0, 0, -0.004);
+  return g;
+}
+const flaps = {};
+{
+  const front = new THREE.Group(); front.position.set(0, H, D_TOP / 2);
+  const back = new THREE.Group(); back.position.set(0, H, -D_TOP / 2);
+  const right = new THREE.Group(); right.position.set(W_TOP / 2, H, 0);
+  const left = new THREE.Group(); left.position.set(-W_TOP / 2, H, 0);
+  const fbGeo = flapGeometry(W_TOP, W_TOP * 0.56, 0.46, true);
+  const sideGeo = flapGeometry(D_TOP, 0.16, 0.34, false);
+  const mk = (geo) => { const m = new THREE.Mesh(geo, paperMat); m.castShadow = true; m.receiveShadow = true; return m; };
+  front.add(mk(fbGeo));
+  const bm = mk(fbGeo); bm.rotation.y = Math.PI; back.add(bm);
+  const rm = mk(sideGeo); rm.rotation.y = Math.PI / 2; right.add(rm);
+  const lm = mk(sideGeo); lm.rotation.y = -Math.PI / 2; left.add(lm);
+  box.add(front, back, right, left);
+  Object.assign(flaps, { front, back, right, left });
+}
+
+// wire handle, hinged on the side walls
+const handle = new THREE.Group();
+handle.position.set(0, H - 0.1, 0);
+{
+  const wx = W_TOP / 2 - 0.012 + 0.01;
+  const pts = [];
+  for (let i = 0; i <= 40; i++) {
+    const a = Math.PI * (i / 40);
+    pts.push(new THREE.Vector3(-Math.cos(a) * (wx + 0.02), Math.sin(a) * 0.62, 0));
+  }
+  const curve = new THREE.CatmullRomCurve3(pts);
+  const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 80, 0.0065, 8, false), wireMat);
+  tube.castShadow = true;
+  handle.add(tube);
+  // small loops where the wire meets the walls
+  [-1, 1].forEach((sx) => {
+    const knot = new THREE.Mesh(new THREE.TorusGeometry(0.022, 0.0055, 8, 20), wireMat);
+    knot.position.set(sx * (wx + 0.02), 0, 0);
+    knot.rotation.y = Math.PI / 2;
+    handle.add(knot);
+  });
+}
+box.add(handle);
+
+// decals
+function placeOnFace(mesh, center, right, up) {
+  const r = right.clone().normalize();
+  const u = up.clone().normalize();
+  const n = new THREE.Vector3().crossVectors(r, u).normalize();
+  const m = new THREE.Matrix4().makeBasis(r, u, n);
+  mesh.quaternion.setFromRotationMatrix(m);
+  mesh.position.copy(center).addScaledVector(n, 0.0025);
+}
+const decalMat = (map) => new THREE.MeshStandardMaterial({ map, transparent: true, roughness: 0.7, polygonOffset: true, polygonOffsetFactor: -2 });
+{
+  const seal = new THREE.Mesh(new THREE.PlaneGeometry(0.25, 0.25), decalMat(sealTexture()));
+  const y = 0.64;
+  const zFace = D_BOT / 2 + ((D_TOP - D_BOT) / 2) * (y / H);
+  placeOnFace(seal, new THREE.Vector3(0, y, zFace), new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, H, (D_TOP - D_BOT) / 2));
+  seal.castShadow = false;
+  box.add(seal);
+}
+const sideDecals = textTexture('鑊氣', { w: 128, h: 300, font: 'Noto Serif TC', color: C.seal, size: 120, vertical: true }).then((tex) => {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 0.234), decalMat(tex));
+  const y = 0.62;
+  const xFace = W_BOT / 2 + ((W_TOP - W_BOT) / 2) * (y / H);
+  placeOnFace(m, new THREE.Vector3(xFace, y, 0), new THREE.Vector3(0, 0, -1), new THREE.Vector3((W_TOP - W_BOT) / 2, H, 0));
+  box.add(m);
+});
+const wordDecal = textTexture('WOK EXPRESS', { w: 512, h: 64, font: 'Archivo', color: '#17191B', size: 34, spacing: 9, weight: 600 }).then((tex) => {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.0425), decalMat(tex));
+  const y = 0.45;
+  const zFace = D_BOT / 2 + ((D_TOP - D_BOT) / 2) * (y / H);
+  placeOnFace(m, new THREE.Vector3(0, y, zFace), new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, H, (D_TOP - D_BOT) / 2));
+  box.add(m);
+});
+
+// ---------- food ----------
+const food = new THREE.Group();
+box.add(food);
+const RX = 0.43, RZ = 0.35;
+const moundY = (x, z) => {
+  const d = (x / RX) ** 2 + (z / RZ) ** 2;
+  return H - 0.07 + 0.15 * Math.max(0, 1 - d) ** 0.8;
+};
+{
+  // base mass so no gaps show through the noodles
+  const g = new THREE.SphereGeometry(1, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2);
+  const pos = g.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i) * RX * 1.02, z = pos.getZ(i) * RZ * 1.02;
+    pos.setXYZ(i, x, moundY(x, z) - 0.03 - (1 - pos.getY(i)) * 0.25, z);
+  }
+  g.computeVertexNormals();
+  const baseMat = new THREE.MeshPhysicalMaterial({ color: C.noodleB.clone().multiplyScalar(0.8), roughness: 0.5, clearcoat: 0.4 });
+  const base = new THREE.Mesh(g, baseMat);
+  base.receiveShadow = true;
+  food.add(base);
+}
+{
+  const geos = [];
+  const col = new THREE.Color();
+  for (let n = 0; n < 300; n++) {
+    let x = rr(-RX * 0.95, RX * 0.95), z = rr(-RZ * 0.95, RZ * 0.95);
+    let dir = rr(0, Math.PI * 2);
+    const pts = [];
+    for (let s = 0; s < 11; s++) {
+      const inside = (x / RX) ** 2 + (z / RZ) ** 2;
+      if (inside > 0.9) dir += Math.PI * 0.75;
+      pts.push(new THREE.Vector3(x, moundY(x, z) + rr(-0.03, 0.028), z));
+      dir += rr(-1.0, 1.0);
+      x += Math.cos(dir) * 0.07; z += Math.sin(dir) * 0.07;
+      x = Math.max(-RX, Math.min(RX, x)); z = Math.max(-RZ, Math.min(RZ, z));
+    }
+    const curve = new THREE.CatmullRomCurve3(pts);
+    const tg = new THREE.TubeGeometry(curve, 70, rr(0.0085, 0.0115), 6, false);
+    col.copy(C.noodleA).lerp(C.noodleB, rand() * 0.8);
+    const count = tg.attributes.position.count;
+    const colors = new Float32Array(count * 3);
+    const charAt = rr(0, 1), charLen = rr(0.04, 0.12), charDepth = rr(0.35, 0.6);
+    for (let i = 0; i < count; i++) {
+      const u = Math.floor(i / 7) / 70;
+      const d = Math.abs(u - charAt);
+      const k = rand() < 0.6 && d < charLen ? 1 - charDepth * (1 - d / charLen) : 1;
+      colors[i * 3] = col.r * k; colors[i * 3 + 1] = col.g * k; colors[i * 3 + 2] = col.b * k;
+    }
+    tg.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geos.push(tg);
+  }
+  const noodleMat = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.4, clearcoat: 0.9, clearcoatRoughness: 0.18 });
+  const noodles = new THREE.Mesh(mergeGeometries(geos), noodleMat);
+  noodles.castShadow = true; noodles.receiveShadow = true;
+  food.add(noodles);
+}
+function scatter(count, makeGeo, mat, lift, spread = 0.86) {
+  const geos = [];
+  for (let i = 0; i < count; i++) {
+    const a = rr(0, Math.PI * 2), r = Math.sqrt(rand()) * spread;
+    const x = Math.cos(a) * r * RX, z = Math.sin(a) * r * RZ;
+    const g = makeGeo();
+    g.rotateX(rr(-0.5, 0.5)); g.rotateY(rr(0, Math.PI * 2)); g.rotateZ(rr(-0.5, 0.5));
+    g.translate(x, moundY(x, z) + lift + rr(0, 0.02), z);
+    geos.push(g);
+  }
+  const m = new THREE.Mesh(mergeGeometries(geos), mat);
+  m.castShadow = true; m.receiveShadow = true;
+  food.add(m);
+}
+function strip() {
+  const g = new THREE.BoxGeometry(rr(0.08, 0.12), 0.009, rr(0.022, 0.032), 8, 1, 2);
+  const p = g.attributes.position;
+  const bend = rr(-0.6, 0.6);
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i); p.setY(i, p.getY(i) + bend * x * x); }
+  g.computeVertexNormals();
+  return g;
+}
+function slice(r, h) {
+  const g = new THREE.CylinderGeometry(r, r, h, 16, 1, true);
+  return g;
+}
+scatter(10, strip, new THREE.MeshPhysicalMaterial({ color: C.beef, roughness: 0.32, clearcoat: 0.95, clearcoatRoughness: 0.15 }), 0.012, 0.8);
+scatter(34, () => slice(rr(0.011, 0.015), 0.009),
+  new THREE.MeshPhysicalMaterial({ color: C.scallion, roughness: 0.4, clearcoat: 0.5, side: THREE.DoubleSide }), 0.03);
+scatter(14, () => slice(rr(0.011, 0.014), 0.009),
+  new THREE.MeshPhysicalMaterial({ color: C.scallionPale, roughness: 0.45, clearcoat: 0.4, side: THREE.DoubleSide }), 0.03);
+scatter(9, () => slice(rr(0.012, 0.015), 0.008),
+  new THREE.MeshPhysicalMaterial({ color: C.chili, roughness: 0.3, clearcoat: 0.9, side: THREE.DoubleSide }), 0.032, 0.65);
+scatter(70, () => new THREE.SphereGeometry(1, 8, 6).scale(0.0062, 0.0032, 0.004),
+  new THREE.MeshStandardMaterial({ color: C.sesame, roughness: 0.6 }), 0.04);
+
+// ---------- chopsticks (stills only) ----------
+const chopsticks = new THREE.Group();
+{
+  const mat = new THREE.MeshPhysicalMaterial({ color: new THREE.Color('#2B211C'), roughness: 0.28, clearcoat: 1, clearcoatRoughness: 0.15 });
+  const tipMat = new THREE.MeshPhysicalMaterial({ color: new THREE.Color('#C43A25'), roughness: 0.3, clearcoat: 1 });
+  [-0.03, 0.03].forEach((dz, i) => {
+    const g = new THREE.CylinderGeometry(0.0075, 0.0125, 1.05, 12);
+    g.rotateZ(Math.PI / 2);
+    const m = new THREE.Mesh(g, mat);
+    m.position.set(0, 0.0125, dz);
+    m.rotation.y = i ? 0.04 : -0.02;
+    m.castShadow = true;
+    chopsticks.add(m);
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(0.0128, 0.0132, 0.06, 12).rotateZ(Math.PI / 2), tipMat);
+    band.position.set(0.47, 0.0125, dz);
+    band.rotation.y = m.rotation.y;
+    chopsticks.add(band);
+  });
+}
+chopsticks.visible = false;
+scene.add(chopsticks);
+
+// ---------- counter ----------
+const counter = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), counterMat);
+counter.rotation.x = -Math.PI / 2;
+counter.receiveShadow = true;
+scene.add(counter);
+
+// ---------- lights ----------
+const key = new THREE.DirectionalLight(new THREE.Color('#FFE4C8'), 2.4);
+key.position.set(-2.4, 4.2, 2.2);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.left = -2.2; key.shadow.camera.right = 2.2;
+key.shadow.camera.top = 2.2; key.shadow.camera.bottom = -2.2;
+key.shadow.camera.near = 1; key.shadow.camera.far = 12;
+key.shadow.radius = 9; key.shadow.blurSamples = 16;
+key.shadow.bias = -0.0004;
+scene.add(key);
+
+const rim = new THREE.SpotLight(new THREE.Color('#FFB27A'), 28, 5.0, 0.42, 0.85, 1.4);
+rim.position.set(1.2, 3.2, -3.4);
+rim.target.position.set(0, 1.1, 0);
+scene.add(rim, rim.target);
+
+const fill = new THREE.HemisphereLight(new THREE.Color('#C9D0D8'), new THREE.Color('#1A1512'), 0.55);
+scene.add(fill);
+
+const pool = new THREE.SpotLight(new THREE.Color('#FFF1E2'), 26, 10, 0.42, 0.9, 1.4);
+pool.position.set(0.4, 5.2, 1.4);
+pool.target.position.set(0, 0.6, 0);
+scene.add(pool, pool.target);
+const front = new THREE.DirectionalLight(new THREE.Color('#F4F1EC'), 0.35);
+front.position.set(2.5, 1.6, 5);
+scene.add(front);
+
+// ---------- steam ----------
+function steamTexture(seed) {
+  const size = 256;
+  const cv = document.createElement('canvas'); cv.width = cv.height = size;
+  const ctx = cv.getContext('2d');
+  const r = mulberry32(seed);
+  // soft body
+  const body = ctx.createRadialGradient(size / 2, size * 0.55, 0, size / 2, size * 0.55, size * 0.42);
+  body.addColorStop(0, 'rgba(255,255,255,0.22)');
+  body.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = body; ctx.fillRect(0, 0, size, size);
+  // curling strands, blurred into wisps
+  ctx.filter = 'blur(5px)';
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 7; i++) {
+    ctx.strokeStyle = `rgba(255,255,255,${0.18 + r() * 0.22})`;
+    ctx.lineWidth = 6 + r() * 12;
+    ctx.beginPath();
+    let x = size * (0.35 + r() * 0.3), y = size * 0.92;
+    ctx.moveTo(x, y);
+    for (let k = 0; k < 4; k++) {
+      const nx = x + (r() - 0.5) * size * 0.35, ny = y - size * (0.16 + r() * 0.08);
+      ctx.quadraticCurveTo(x + (r() - 0.5) * size * 0.45, (y + ny) / 2, nx, ny);
+      x = nx; y = ny;
+    }
+    ctx.stroke();
+  }
+  ctx.filter = 'none';
+  const img = ctx.getImageData(0, 0, size, size);
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const d = Math.hypot((x - size / 2) / (size / 2), (y - size / 2) / (size / 2));
+    img.data[(y * size + x) * 4 + 3] *= Math.max(0, 1 - d) ** 1.2;
+  }
+  ctx.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(cv);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const steamTexs = [steamTexture(77), steamTexture(78), steamTexture(79), steamTexture(80)];
+const STEAM = [];
+{
+  const sr = mulberry32(4242);
+  for (let i = 0; i < 80; i++) {
+    const mat = new THREE.SpriteMaterial({ map: steamTexs[i % 4], color: new THREE.Color('#FFF6EC'), transparent: true, depthWrite: false, opacity: 0 });
+    const s = new THREE.Sprite(mat);
+    const a = sr() * Math.PI * 2, rad = Math.sqrt(sr()) * 0.7;
+    STEAM.push({
+      sprite: s,
+      birth: 1.5 + i * 0.06 + sr() * 0.05,
+      life: 2.6 + sr() * 1.1,
+      x: Math.cos(a) * rad * RX, z: Math.sin(a) * rad * RZ,
+      phase: sr() * Math.PI * 2,
+      spin: (sr() - 0.5) * 0.6,
+      size: 0.16 + sr() * 0.12,
+      rise: 0.26 + sr() * 0.12,
+      peak: 0.38 + sr() * 0.3,
+    });
+    box.add(s);
+  }
+}
+function updateSteam(tau, openness, intensity = 1) {
+  for (const p of STEAM) {
+    // particles loop so late film time is never empty
+    let age = tau - p.birth;
+    if (age > p.life) age = ((age % p.life) + p.life) % p.life;
+    const vis = age >= 0 && tau >= p.birth;
+    if (!vis) { p.sprite.visible = false; continue; }
+    p.sprite.visible = true;
+    const k = age / p.life;
+    const y = moundY(p.x, p.z) + 0.06 + age * p.rise + age * age * 0.03;
+    const x = p.x + Math.sin(age * 1.2 + p.phase) * 0.05 * age - age * 0.035;
+    const z = p.z + Math.cos(age * 0.9 + p.phase) * 0.03 * age - age * 0.16;
+    p.sprite.position.set(x, y, z);
+    const sc = p.size + age * 0.26;
+    p.sprite.scale.set(sc, sc * 1.25, 1);
+    p.sprite.material.rotation = p.phase + age * p.spin;
+    const env = smooth(0.06, 0.3, k) * (1 - smooth(0.5, 1, k));
+    p.sprite.material.opacity = p.peak * env * openness * intensity;
+  }
+}
+
+// ---------- film state ----------
+const camPath = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(1.55, 1.2, 5.1),
+  new THREE.Vector3(1.65, 2.05, 3.9),
+  new THREE.Vector3(1.05, 3.25, 2.35),
+], false, 'centripetal');
+const targetPath = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(-1.02, 0.78, 0),
+  new THREE.Vector3(-0.72, 0.92, 0),
+  new THREE.Vector3(-0.42, 0.98, 0.05),
+], false, 'centripetal');
+
+function setFlaps(openFB, openSide) {
+  const tilt = Math.atan(((D_TOP - D_BOT) / 2) / H);
+  const fb = lerp(-1.16, tilt + 0.42, openFB);
+  flaps.front.rotation.x = fb;
+  flaps.back.rotation.x = -fb;
+  const tiltS = Math.atan(((W_TOP - W_BOT) / 2) / H);
+  const sd = lerp(1.38, -(tiltS + 0.5), openSide);
+  flaps.right.rotation.z = sd;
+  flaps.left.rotation.z = -sd;
+}
+
+function setFilm(t) {
+  const tau = t * DURATION;
+  const camT = smoother(0, 1, t);
+  camera.position.copy(camPath.getPoint(camT));
+  camera.lookAt(targetPath.getPoint(camT));
+  camera.fov = 30; camera.updateProjectionMatrix();
+  const openSide = smoother(0.16, 0.5, t);
+  const openFB = smoother(0.2, 0.58, t);
+  setFlaps(openFB, openSide);
+  handle.rotation.x = -1.42 * smoother(0.04, 0.36, t);
+  chopsticks.visible = false;
+  food.visible = openSide > 0.02 || openFB > 0.02;
+  updateSteam(tau, smooth(0.25, 0.6, t), 1);
+}
+
+const STILLS = {
+  closed() {
+    setFlaps(0, 0);
+    handle.rotation.x = 0;
+    food.visible = false;
+    updateSteam(0, 0);
+    chopsticks.visible = true;
+    chopsticks.position.set(0.72, 0, 0.78);
+    chopsticks.rotation.y = 0.62;
+    camera.fov = 26; camera.updateProjectionMatrix();
+    camera.position.set(2.1, 1.55, 4.3);
+    camera.lookAt(0.12, 0.7, 0);
+  },
+  openTop() {
+    setFlaps(1, 1);
+    handle.rotation.x = -1.42;
+    food.visible = true;
+    updateSteam(5.2, 1, 0.45);
+    chopsticks.visible = false;
+    camera.fov = 26; camera.updateProjectionMatrix();
+    camera.position.set(0.5, 4.1, 1.6);
+    camera.lookAt(0.0, 0.95, 0.02);
+  },
+  macro() {
+    setFlaps(1, 1);
+    handle.rotation.x = -1.42;
+    food.visible = true;
+    updateSteam(4.6, 1, 1.1);
+    chopsticks.visible = false;
+    camera.fov = 22; camera.updateProjectionMatrix();
+    camera.position.set(0.9, 1.72, 1.35);
+    camera.lookAt(-0.05, 1.08, 0.0);
+  },
+  side() {
+    setFlaps(0, 0);
+    handle.rotation.x = 0;
+    food.visible = false;
+    updateSteam(0, 0);
+    chopsticks.visible = false;
+    camera.fov = 24; camera.updateProjectionMatrix();
+    camera.position.set(3.7, 1.25, 2.1);
+    camera.lookAt(0.0, 0.72, 0);
+  },
+};
+
+window.renderFilm = (t) => { setFilm(t); renderer.render(scene, camera); };
+window.renderStill = (name) => { STILLS[name](); renderer.render(scene, camera); };
+await Promise.all([sideDecals, wordDecal]);
+window.sceneReady = true;
+</script>
+</body>
+</html>
