@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Double Fang | AI that actually does the work</title>
+<meta name="description" content="Double Fang builds AI business models, websites and automations that run while you sleep. One team, every part of it.">
+<meta name="theme-color" content="#0b0c0e" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f1f1ee" media="(prefers-color-scheme: light)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Double Fang">
+<meta property="og:description" content="AI business models, websites and automations. One team, every part of it.">
+<meta property="og:image" content="assets/og.png">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/main.css">
+<script>
+  (function () {
+    var d = document.documentElement, c = 'dark';
+    d.classList.add('js');
+    try { c = localStorage.getItem('df-theme') || 'dark'; } catch (e) {}
+    if (c === 'system') c = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    d.setAttribute('data-theme', c);
+  })();
+</script>
+</head>
+<body class="load">
+<a class="skip" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-arrow" viewBox="0 0 256 256"><path d="M198,64V168a6,6,0,0,1-12,0V78.48L68.24,196.24a6,6,0,0,1-8.48-8.48L177.52,70H88a6,6,0,0,1,0-12H192A6,6,0,0,1,198,64Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 256 256"><path d="M228.24,76.24l-128,128a6,6,0,0,1-8.48,0l-56-56a6,6,0,0,1,8.48-8.48L96,191.51,219.76,67.76a6,6,0,0,1,8.48,8.48Z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 256 256"><path d="M208,82H174V56a46,46,0,0,0-92,0V82H48A14,14,0,0,0,34,96V208a14,14,0,0,0,14,14H208a14,14,0,0,0,14-14V96A14,14,0,0,0,208,82ZM94,56a34,34,0,0,1,68,0V82H94ZM210,208a2,2,0,0,1-2,2H48a2,2,0,0,1-2-2V96a2,2,0,0,1,2-2H208a2,2,0,0,1,2,2Z"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 256 256"><path d="M208,34H182V24a6,6,0,0,0-12,0V34H86V24a6,6,0,0,0-12,0V34H48A14,14,0,0,0,34,48V208a14,14,0,0,0,14,14H208a14,14,0,0,0,14-14V48A14,14,0,0,0,208,34ZM48,46H74V56a6,6,0,0,0,12,0V46h84V56a6,6,0,0,0,12,0V46h26a2,2,0,0,1,2,2V82H46V48A2,2,0,0,1,48,46ZM208,210H48a2,2,0,0,1-2-2V94H210V208A2,2,0,0,1,208,210Zm-39.76-86.24a6,6,0,0,1,0,8.48l-48,48a6,6,0,0,1-8.48,0l-24-24a6,6,0,0,1,8.48-8.48L116,167.51l43.76-43.75A6,6,0,0,1,168.24,123.76Z"/></symbol>
+  <symbol id="i-target" viewBox="0 0 256 256"><path d="M220.06,84a102.06,102.06,0,1,1-24.31-32.27l24-24a6,6,0,0,1,8.48,8.49l-96,96a6,6,0,1,1-8.48-8.49l29.39-29.4a42,42,0,1,0,16.78,31.24,6,6,0,1,1,12-.68A54,54,0,1,1,161.7,85.83l25.54-25.55a89.91,89.91,0,1,0,22,28.93A6,6,0,1,1,220.06,84Z"/></symbol>
+  <symbol id="i-store" viewBox="0 0 256 256"><path d="M26.22,94.41A6,6,0,0,0,26,96v16A38,38,0,0,0,42,143V216a6,6,0,0,0,6,6H208a6,6,0,0,0,6-6V143A38,38,0,0,0,230,112V96a5.91,5.91,0,0,0-.23-1.64L215.43,44.15A14.07,14.07,0,0,0,202,34H54A14.07,14.07,0,0,0,40.57,44.15Zm25.89-47A2,2,0,0,1,54,46H202a2,2,0,0,1,1.92,1.45L216.05,90H40ZM102,102h52v10a26,26,0,0,1-52,0Zm-64,0H90v10a26,26,0,0,1-38.18,23,6,6,0,0,0-1.65-1A26,26,0,0,1,38,112ZM202,210H54V148.66a38,38,0,0,0,42-16.21,37.95,37.95,0,0,0,64,0,38,38,0,0,0,42,16.21Zm3.83-76a6,6,0,0,0-1.65,1A26,26,0,0,1,166,112V102h52v10A26,26,0,0,1,205.83,134Z"/></symbol>
+  <symbol id="i-tray" viewBox="0 0 256 256"><path d="M208,34H48A14,14,0,0,0,34,48V208a14,14,0,0,0,14,14H208a14,14,0,0,0,14-14V48A14,14,0,0,0,208,34ZM48,46H208a2,2,0,0,1,2,2V154H179.31a13.94,13.94,0,0,0-9.9,4.1L150.1,177.41a2,2,0,0,1-1.41.59H107.31a2,2,0,0,1-1.41-.58L86.59,158.1a13.94,13.94,0,0,0-9.9-4.1H46V48A2,2,0,0,1,48,46ZM208,210H48a2,2,0,0,1-2-2V166H76.69a2,2,0,0,1,1.41.58L97.41,185.9a13.94,13.94,0,0,0,9.9,4.1h41.38a13.94,13.94,0,0,0,9.9-4.1l19.31-19.31a2,2,0,0,1,1.41-.59H210v42A2,2,0,0,1,208,210Z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 256 256"><path d="M230,208a6,6,0,0,1-6,6H32a6,6,0,0,1-6-6V48a6,6,0,0,1,12,0V161.52l53.76-53.76a6,6,0,0,1,8.48,0L128,135.51,185.52,78H160a6,6,0,0,1,0-12h40a6,6,0,0,1,6,6v40a6,6,0,0,1-12,0V86.48l-61.76,61.76a6,6,0,0,1-8.48,0L96,120.49l-58,58V202H224A6,6,0,0,1,230,208Z"/></symbol>
+  <symbol id="i-film" viewBox="0 0 256 256"><path d="M216,42H40A14,14,0,0,0,26,56V200a14,14,0,0,0,14,14H216a14,14,0,0,0,14-14V56A14,14,0,0,0,216,42ZM38,86h84v84H38Zm96-12V54h36V74Zm-12,0H86V54h36Zm0,108v20H86V182Zm12,0h36v20H134Zm0-12V86h84v84ZM218,56V74H182V54h34A2,2,0,0,1,218,56ZM40,54H74V74H38V56A2,2,0,0,1,40,54ZM38,200V182H74v20H40A2,2,0,0,1,38,200Zm178,2H182V182h36v18A2,2,0,0,1,216,202Z"/></symbol>
+  <symbol id="i-fang" viewBox="0 0 100 100"><rect x="8" y="4" width="84" height="9" rx="4.5" style="fill:var(--ember)"/><path d="M16 20H45C45 47 42 70 37 94C30 70 20 48 16 20Z" style="fill:var(--ink)"/><path d="M55 20H84C80 48 70 70 63 94C58 70 55 47 55 20Z" style="fill:var(--ink)"/></symbol>
+</svg>
+
+<div class="glow" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <a class="brand" href="#top" aria-label="Double Fang, back to top"><svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-fang"/></svg>Double Fang</a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#estimate">Estimate</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="nav-right">
+    <a class="btn btn-sm" href="#contact">Book a call<span class="btn-icon"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span></a>
+    <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span></span><span></span></button>
+  </div>
+</header>
+
+<nav class="menu" id="menu" aria-label="Menu">
+  <a href="#services" style="--i:0">Services</a>
+  <a href="#estimate" style="--i:1">Estimate</a>
+  <a href="#process" style="--i:2">Process</a>
+  <a href="#faq" style="--i:3">FAQ</a>
+  <a class="btn" href="#contact" style="--i:4">Book a call<span class="btn-icon"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span></a>
+</nav>
+
+<main id="main">
+  <!-- HERO: a website builds itself as you scroll -->
+  <section class="hero" id="top" aria-label="Introduction">
+    <div class="stage">
+      <div class="wrap stage-grid">
+        <div class="bands">
+          <div class="band" data-band="0">
+            <h1 class="hero-title">AI that actually does the <em>work.</em></h1>
+            <p class="hero-sub">Double Fang builds AI business models, websites and automations that run while you sleep. One team, every part of it.</p>
+            <div class="ctas">
+              <a class="btn" href="#contact">Book a call<span class="btn-icon"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span></a>
+              <a class="link" href="#services">See what we build</a>
+            </div>
+          </div>
+          <div class="band" data-band="1" aria-hidden="true">
+            <h2 class="band-title">You tell us what eats your week.</h2>
+            <p>One call. Plain words. No AI homework.</p>
+          </div>
+          <div class="band" data-band="2" aria-hidden="true">
+            <h2 class="band-title">We design it, write it and build it.</h2>
+            <p>Copy, layout and code, shaped around one goal.</p>
+          </div>
+          <div class="band" data-band="3" aria-hidden="true">
+            <h2 class="band-title">It goes live. You get your week <em>back.</em></h2>
+            <a class="btn" href="#contact" tabindex="-1">Book a call<span class="btn-icon"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span></a>
+          </div>
+        </div>
+
+        <div class="shell browser-shell" id="browser-shell">
+          <div class="core browser spot" id="browser" role="img" aria-label="A website for an example roofing company, built piece by piece by AI">
+            <div class="bar-top" aria-hidden="true"><i></i><i></i><i></i><span class="url"><svg class="lock" aria-hidden="true"><use href="#i-lock"/></svg><span id="url-text">northside-roofing.com</span></span></div>
+            <div class="canvas" aria-hidden="true">
+              <div class="prompt"><svg class="mark" viewBox="0 0 100 100"><use href="#i-fang"/></svg><span><span class="prompt-text" id="prompt-text"></span><span class="caret"></span></span></div>
+              <div class="piece ms-nav"><b>Northside Roofing</b><span>Repairs</span><span>Reviews</span><span class="ms-pill">Get a quote</span></div>
+              <div class="ms-hero">
+                <div>
+                  <p class="piece ms-h">Leaks fixed this week. Not next month.</p>
+                  <p class="piece ms-p">Free inspection, one fixed price, and photos of every repair before we leave.</p>
+                  <span class="piece ms-btn">Book an inspection</span>
+                </div>
+                <div class="piece ms-quote"><strong>Get a price today</strong><span class="ms-field">Your address</span><span class="ms-field">What is wrong?</span><span class="ms-go">Check my roof</span></div>
+              </div>
+              <div class="piece ms-stats"><div><strong>Same week</strong><span>repairs</span></div><div><strong>Fixed</strong><span>pricing</span></div><div><strong>Photo</strong><span>proof</span></div></div>
+            </div>
+            <div class="status" aria-hidden="true"><span class="dot"></span><span id="status-text">Reading your brief</span><span class="pct" id="status-pct">0%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PREMISE -->
+  <section class="pad" id="premise" aria-label="Why Double Fang">
+    <div class="wrap">
+      <p class="premise-text" id="premise-text">You started a business to do work you love. Not to answer the same questions all day, copy orders between tabs and chase leads at 11pm. <span class="em-group">That part is ours now.</span></p>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="pad" id="services" aria-labelledby="services-h">
+    <div class="wrap">
+      <div class="services-head">
+        <span class="eyebrow reveal">What we do</span>
+        <h2 class="h2 reveal" id="services-h" style="--i:1">One studio for everything AI.</h2>
+        <p class="lede reveal" style="--i:2">You bring the business. We find where AI pays off, then design it, build it and keep it running.</p>
+      </div>
+      <div class="bento reveal">
+        <article class="cell cell-web spot">
+          <div class="cell-visual">
+            <div class="phone" id="phone" role="img" aria-label="The example roofing site on a phone, scrolling">
+              <div class="phone-screen" aria-hidden="true">
+                <div class="phone-notch"></div>
+                <div class="phone-page">
+                  <div class="pp-nav">Northside<span></span></div>
+                  <p class="pp-h">Leaks fixed this week.</p>
+                  <p class="pp-p">Free inspection, one fixed price, photos of every repair.</p>
+                  <span class="pp-btn">Book an inspection</span>
+                  <div class="pp-card"><strong>Same week</strong><span>repairs across the county</span></div>
+                  <div class="pp-card"><strong>Fixed pricing</strong><span>agreed before we climb</span></div>
+                  <div class="pp-card"><strong>Photo proof</strong><span>of every repair</span></div>
+                  <div class="pp-card"><strong>Get a price today</strong><span>Your address</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="cell-text"><h3>Websites that sell</h3><p>Fast, good-looking sites built around one goal: turning a visitor into a customer.</p></div>
+        </article>
+
+        <article class="cell cell-auto spot">
+          <div class="cell-visual">
+            <svg class="flow" viewBox="0 0 320 170" role="img" aria-label="A new lead goes to AI, which updates the CRM, sends a reply and pings the team">
+              <path id="w1" class="wire" d="M84 85 C 108 85, 110 85, 132 85"/>
+              <path id="w2" class="wire" d="M188 85 C 212 85, 212 30, 236 30"/>
+              <path id="w3" class="wire" d="M188 85 C 212 85, 212 85, 236 85"/>
+              <path id="w4" class="wire" d="M188 85 C 212 85, 212 140, 236 140"/>
+              <g class="node"><rect x="4" y="70" width="80" height="30" rx="15"/><text x="44" y="89" text-anchor="middle">New lead</text></g>
+              <g class="node ai"><rect x="132" y="68" width="56" height="34" rx="17"/><text x="160" y="89" text-anchor="middle">AI</text></g>
+              <g class="node"><rect x="236" y="15" width="80" height="30" rx="15"/><text x="276" y="34" text-anchor="middle">CRM</text></g>
+              <g class="node"><rect x="236" y="70" width="80" height="30" rx="15"/><text x="276" y="89" text-anchor="middle">Reply sent</text></g>
+              <g class="node"><rect x="236" y="125" width="80" height="30" rx="15"/><text x="276" y="144" text-anchor="middle">Team ping</text></g>
+              <circle class="pulse" r="3.5"><animateMotion dur="2.4s" repeatCount="indefinite" calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines="0.32 0.72 0 1"><mpath href="#w1"/></animateMotion></circle>
+              <circle class="pulse" r="3"><animateMotion dur="2.4s" begin="0.9s" repeatCount="indefinite" calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines="0.32 0.72 0 1"><mpath href="#w2"/></animateMotion></circle>
+              <circle class="pulse" r="3"><animateMotion dur="2.4s" begin="1.05s" repeatCount="indefinite" calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines="0.32 0.72 0 1"><mpath href="#w3"/></animateMotion></circle>
+              <circle class="pulse" r="3"><animateMotion dur="2.4s" begin="1.2s" repeatCount="indefinite" calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines="0.32 0.72 0 1"><mpath href="#w4"/></animateMotion></circle>
+            </svg>
+          </div>
+          <div class="cell-text"><h3>Automations</h3><p>Your busywork, wired together and running on its own. Leads, email, invoices, follow-ups.</p></div>
+        </article>
+
+        <article class="cell cell-chat spot">
+          <div class="cell-visual"><div class="chat" id="chat" role="log" aria-label="Example conversation with a booking assistant"></div></div>
+          <div class="cell-text"><h3>AI agents</h3><p>Assistants that answer customers, book appointments and qualify leads, day and night.</p></div>
+        </article>
+
+        <article class="cell cell-model spot">
+          <div class="cell-visual">
+            <div class="orbit" id="orbit" role="img" aria-label="Your business at the center, with offer, audience, AI engine and revenue around it">
+              <div class="orbit-stage" aria-hidden="true">
+                <div class="ring"></div><div class="ring in"></div>
+                <div class="spin">
+                  <div class="node-o"><span>Offer</span></div>
+                  <div class="node-o"><span>Audience</span></div>
+                  <div class="node-o"><span>AI engine</span></div>
+                  <div class="node-o"><span>Revenue</span></div>
+                </div>
+                <div class="core-o">Your<br>business</div>
+              </div>
+            </div>
+          </div>
+          <div class="cell-text"><h3>AI business models</h3><p>We find where AI makes you money or saves you hours, then build that part first.</p></div>
+        </article>
+
+        <article class="cell cell-content spot">
+          <div class="cell-visual">
+            <div class="fan" id="fan">
+              <div class="fan-card"><small>NEWSLETTER</small><p>This week: the follow-up email that books calls.</p></div>
+              <div class="fan-card"><small>LINKEDIN POST</small><p>We automated our own inbox. Here is what broke first.</p></div>
+              <div class="fan-card"><small>VIDEO SCRIPT</small><p>Hook: you answer the same five emails every single day.</p></div>
+            </div>
+          </div>
+          <div class="cell-text"><h3>Content systems</h3><p>Posts, emails and scripts in your voice, drafted on a schedule and ready for your yes.</p></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTIMATE -->
+  <section class="pad" id="estimate" aria-labelledby="estimate-h">
+    <div class="wrap">
+      <span class="eyebrow reveal">Try it</span>
+      <h2 class="h2 reveal" id="estimate-h" style="--i:1">What could AI win back for you?</h2>
+      <div class="calc">
+        <div class="shell reveal">
+          <div class="core">
+            <div class="field">
+              <div class="field-top"><label for="r-team">People on your team</label><output id="o-team" for="r-team">6</output></div>
+              <input type="range" id="r-team" min="1" max="50" value="6">
+            </div>
+            <div class="field">
+              <div class="field-top"><label for="r-hours">Hours each spends on repeat tasks per week</label><output id="o-hours" for="r-hours">8</output></div>
+              <input type="range" id="r-hours" min="1" max="25" value="8">
+            </div>
+            <div class="field">
+              <div class="field-top"><label for="r-rate">Cost of an hour of their time</label><output id="o-rate" for="r-rate">$35</output></div>
+              <input type="range" id="r-rate" min="15" max="150" step="5" value="35">
+            </div>
+          </div>
+        </div>
+        <div class="shell result reveal" style="--i:1">
+          <div class="core" aria-live="polite">
+            <div><div class="big" id="res-hours">1,382</div><div class="big-cap">hours back every year</div></div>
+            <div class="pair">
+              <div><strong id="res-money">$48,384</strong><span>worth of time each year</span></div>
+              <div><strong id="res-weeks">35</strong><span>full work weeks</span></div>
+            </div>
+            <div class="weeks" id="weeks" aria-hidden="true"></div>
+            <p class="note">A rough estimate, not a promise. It assumes we automate about 60% of repeat work across 48 working weeks.</p>
+            <a class="btn" href="#contact" id="carry">Book a call<span class="btn-icon"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="pad" id="process" aria-labelledby="process-h">
+    <div class="wrap process-grid">
+      <div class="process-side">
+        <h2 class="h2 reveal" id="process-h">From first call to live in weeks.</h2>
+        <svg class="path-svg reveal" style="--i:1" viewBox="0 0 440 290" aria-hidden="true">
+          <path class="path-base" d="M24 244 C 110 244, 120 150, 220 150 S 330 44, 416 44"/>
+          <path class="path-draw" id="path-draw" pathLength="1" d="M24 244 C 110 244, 120 150, 220 150 S 330 44, 416 44"/>
+          <g class="wp"><circle cx="24" cy="244" r="8"/><text x="24" y="276" text-anchor="middle">Map</text></g>
+          <g class="wp"><circle cx="220" cy="150" r="8"/><text x="220" y="182" text-anchor="middle">Build</text></g>
+          <g class="wp"><circle cx="416" cy="44" r="8"/><text x="416" y="76" text-anchor="middle">Launch</text></g>
+        </svg>
+      </div>
+      <ol class="steps" id="steps">
+        <li><h3>Map</h3><p>One call to learn how your business runs. We find the hours and money AI can win back, and pick the first thing to build.</p></li>
+        <li><h3>Build</h3><p>We design and build it while you run your business. You see progress every few days and nothing ships without your yes.</p></li>
+        <li><h3>Launch</h3><p>It goes live, plugged into the tools you already use, with a short walkthrough for your team.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- PROMISES -->
+  <section class="pad" id="promises" aria-labelledby="promises-h">
+    <div class="wrap promise-grid">
+      <div class="reveal">
+        <div class="numeral" aria-hidden="true">3</div>
+        <p class="numeral-cap"><span class="sr">3 </span>weeks, give or take, from first call to launch.</p>
+      </div>
+      <div class="reveal" style="--i:1">
+        <h2 class="h2" id="promises-h">Four rules we work by.</h2>
+        <div class="ticket">
+          <div class="ticket-head"><span>[ Double Fang ]</span><span>House rules</span></div>
+          <ol>
+            <li>Fixed price before we start</li>
+            <li>You own everything we build</li>
+            <li>Plain words, never jargon</li>
+            <li>If it won't pay off, we say so</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXAMPLE BUILDS -->
+  <section class="pan" id="work" aria-labelledby="work-h">
+    <div class="pan-stage">
+      <div class="wrap pan-head"><h2 class="h2 reveal" id="work-h">Things we can build for you.</h2></div>
+      <div class="track" id="track">
+        <article class="work shell"><div class="core"><div class="work-top" style="--gx:20%;--gy:20%"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg></div><div class="work-body"><h3>Booking agent</h3><p>Answers DMs and books appointments for a hair studio, around the clock.</p></div></div></article>
+        <article class="work shell"><div class="core"><div class="work-top" style="--gx:80%;--gy:30%"><svg class="ic" aria-hidden="true"><use href="#i-target"/></svg></div><div class="work-body"><h3>Lead engine</h3><p>Finds, scores and emails local leads for a roofing company.</p></div></div></article>
+        <article class="work shell"><div class="core"><div class="work-top" style="--gx:40%;--gy:85%"><svg class="ic" aria-hidden="true"><use href="#i-store"/></svg></div><div class="work-body"><h3>Store in a week</h3><p>A fast shop site with product pages drafted by AI and checked by a person.</p></div></div></article>
+        <article class="work shell"><div class="core"><div class="work-top" style="--gx:10%;--gy:60%"><svg class="ic" aria-hidden="true"><use href="#i-tray"/></svg></div><div class="work-body"><h3>Inbox triage</h3><p>Sorts, drafts and flags email for a small law office before anyone logs in.</p></div></div></article>
+        <article class="work shell"><div class="core"><div class="work-top" style="--gx:70%;--gy:10%"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg></div><div class="work-body"><h3>Monday report</h3><p>Pulls numbers from five tools into one clear email every week.</p></div></div></article>
+        <article class="work shell"><div class="core"><div class="work-top" style="--gx:50%;--gy:40%"><svg class="ic" aria-hidden="true"><use href="#i-film"/></svg></div><div class="work-body"><h3>Content engine</h3><p>Turns one founder video into a week of posts in their own voice.</p></div></div></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="pad" id="faq" aria-labelledby="faq-h">
+    <div class="wrap faq-wrap">
+      <h2 class="h2 reveal" id="faq-h">Questions people ask first.</h2>
+      <div class="faq reveal" style="--i:1">
+        <details><summary>Do I need to know anything about AI?<span class="pm" aria-hidden="true"></span></summary><p>No. You know your business, we know the tools. We explain every choice in plain words and hand you something that just works.</p></details>
+        <details><summary>How fast can you ship?<span class="pm" aria-hidden="true"></span></summary><p>Most websites and single automations go live in two to four weeks. Bigger systems ship in pieces, so you get value early instead of waiting for the whole thing.</p></details>
+        <details><summary>What does it cost?<span class="pm" aria-hidden="true"></span></summary><p>Every project gets a fixed price after the first call, so there are no surprise invoices. If we cannot find a clear return for you, we will say so.</p></details>
+        <details><summary>Will it work with the tools I already use?<span class="pm" aria-hidden="true"></span></summary><p>Almost always. Gmail, Outlook, Shopify, HubSpot, Notion, Slack, Google Sheets and most booking tools connect without you switching anything.</p></details>
+        <details><summary>Who owns what you build?<span class="pm" aria-hidden="true"></span></summary><p>You do. The accounts, the code and the data are yours from day one.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CALL -->
+  <section class="pad cta" id="contact" aria-labelledby="contact-h">
+    <canvas id="fang-field" aria-hidden="true"></canvas>
+    <div class="wrap cta-grid">
+      <div class="cta-copy">
+        <h2 class="h2 cta-title reveal" id="contact-h">Tell us what eats your week.</h2>
+        <p class="lede reveal" style="--i:1">Send a few lines about your business. We reply within one business day with a first idea, free.</p>
+        <p class="hint reveal" style="--i:2" id="hint">Move your cursor through the mark. Click to break it.</p>
+      </div>
+      <div class="shell form reveal" style="--i:1">
+        <div class="core">
+          <form id="lead-form" novalidate>
+            <fieldset>
+              <legend>Book a call</legend>
+              <div class="f">
+                <label for="f-name">Your name</label>
+                <input id="f-name" name="name" autocomplete="name" placeholder="Maya Okafor" aria-describedby="e-name">
+                <span class="err" id="e-name" hidden>Please add your name.</span>
+              </div>
+              <div class="f">
+                <label for="f-email">Email</label>
+                <input id="f-email" name="email" type="email" autocomplete="email" placeholder="maya@yourcompany.com" aria-describedby="h-email e-email">
+                <span class="help" id="h-email">We reply here, nowhere else.</span>
+                <span class="err" id="e-email" hidden>That email does not look right yet.</span>
+              </div>
+              <div class="f">
+                <label for="f-need">What do you want built?</label>
+                <select id="f-need" name="need">
+                  <option>Not sure yet, help me find it</option>
+                  <option>A website</option>
+                  <option>An automation</option>
+                  <option>An AI agent</option>
+                  <option>A content system</option>
+                  <option>A new AI business model</option>
+                </select>
+              </div>
+              <div class="f">
+                <label for="f-msg">What takes up too much of your week?</label>
+                <textarea id="f-msg" name="message" placeholder="We spend every Monday copying orders into a spreadsheet."></textarea>
+              </div>
+              <div class="form-foot">
+                <button class="btn" type="submit">Book a call<span class="btn-icon"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span></button>
+                <p class="privacy">We only use your details to reply. No mailing lists, never sold.</p>
+              </div>
+            </fieldset>
+          </form>
+          <div class="success" id="success" role="status" hidden>
+            <div class="check"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></div>
+            <h3>Thanks, <span id="s-name">there</span>.</h3>
+            <p>This is a preview, so nothing was sent yet. Once the form is connected, your note goes straight to the Double Fang inbox.</p>
+            <button class="link" type="button" id="again">Write another</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="brand" href="#top"><svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-fang"/></svg>Double Fang</a>
+        <p>AI business models, websites and automations for small businesses. New studio, taking its first clients now.</p>
+      </div>
+      <nav aria-label="Footer">
+        <a href="#services">Services</a>
+        <a href="#estimate">Estimate</a>
+        <a href="#process">Process</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contact">Book a call</a>
+      </nav>
+      <div class="foot-end">
+        <div class="theme-switch" role="radiogroup" aria-label="Color theme">
+          <label><input type="radio" name="theme" value="system"><span>System</span></label>
+          <label><input type="radio" name="theme" value="light"><span>Light</span></label>
+          <label><input type="radio" name="theme" value="dark"><span>Dark</span></label>
+        </div>
+        <a class="link" href="#top">Back to top</a>
+      </div>
+    </div>
+    <div class="foot-base"><span>&copy; <span id="year">2026</span> Double Fang</span><span>Examples on this page show the kind of work we do. They are not client case studies.</span></div>
+  </div>
+</footer>
+
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>
