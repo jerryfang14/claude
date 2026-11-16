@@ -1,30 +1,109 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-mode="day">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Page not found | Double Fang</title>
+<base href="/">
 <meta name="robots" content="noindex">
+<title>Page not found | Double Fang</title>
+<meta name="description" content="This page does not exist.">
+<meta name="theme-color" content="#fdfdfe">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/main.css">
-<script>try{var c=localStorage.getItem('df-theme')||'dark';if(c==='system')c=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',c);}catch(e){}</script>
-<style>
-  .nf { min-height: 100vh; min-height: 100svh; display: grid; place-items: center; text-align: left; }
-  .nf .numeral { font-size: clamp(8rem, 26vw, 16rem); }
-  .nf .mark { width: 44px; height: 44px; margin-bottom: 32px; }
-  .nf p { color: var(--muted); max-width: 36ch; margin: 18px 0 32px; }
-</style>
+<script>
+  (function () {
+    var d = document.documentElement, c = 'light';
+    d.classList.add('js');
+    try { c = localStorage.getItem('df-theme') || 'light'; } catch (e) {}
+    if (c === 'system') c = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    d.setAttribute('data-mode', c === 'dark' ? 'night' : 'day');
+  })();
+</script>
 </head>
 <body>
-<div class="grain" aria-hidden="true"></div>
-<main class="nf wrap">
-  <div>
-    <svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><rect class="bar" x="8" y="4" width="84" height="9" rx="4.5"/><path class="fang" d="M16 20H45C45 47 42 70 37 94C30 70 20 48 16 20Z"/><path class="fang" d="M55 20H84C80 48 70 70 63 94C58 70 55 47 55 20Z"/></svg>
-    <div class="numeral" aria-hidden="true">404</div>
-    <h1 class="h2">This page slipped through.</h1>
-    <p>The link may be old or mistyped. Everything we do lives on the home page.</p>
-    <a class="btn" href="./">Back to Double Fang<span class="btn-icon"><svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path d="M198,64V168a6,6,0,0,1-12,0V78.48L68.24,196.24a6,6,0,0,1-8.48-8.48L177.52,70H88a6,6,0,0,1,0-12H192A6,6,0,0,1,198,64Z"/></svg></span></a>
+<a class="skip" href="#main">Skip to content</a>
+
+<section class="consent" id="consent" aria-labelledby="consent-h" hidden>
+  <h2 id="consent-h">Your privacy, your call</h2>
+  <p>This site saves two things in your browser: your theme and this choice. No ads and no tracking. We do not run analytics today. If we ever add them, they stay off unless you say yes. <a href="cookies.html">Cookie policy</a></p>
+  <div class="consent-actions">
+    <button class="pill" type="button" data-consent="essential">Essential only</button>
+    <button class="pill" type="button" data-consent="all">Allow analytics</button>
   </div>
+</section>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-arrow" viewBox="0 0 256 256"><path d="M198,64V168a6,6,0,0,1-12,0V78.48L68.24,196.24a6,6,0,0,1-8.48-8.48L177.52,70H88a6,6,0,0,1,0-12H192A6,6,0,0,1,198,64Z"/></symbol>
+  <symbol id="i-fang" viewBox="0 0 100 100"><rect x="8" y="4" width="84" height="9" rx="4.5" style="fill:var(--red)"/><path d="M16 20H45C45 47 42 70 37 94C30 70 20 48 16 20Z"/><path d="M55 20H84C80 48 70 70 63 94C58 70 55 47 55 20Z"/></symbol>
+</svg>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav simple">
+  <a class="brand" href="index.html" aria-label="Double Fang home"><svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-fang"/></svg>Double Fang</a>
+  <ul class="nav-links legal-nav">
+    <li><a href="privacy.html">Privacy</a></li>
+    <li><a href="terms.html">Terms</a></li>
+    <li><a href="refunds.html">Refunds</a></li>
+    <li><a href="cookies.html">Cookies</a></li>
+  </ul>
+  <div class="nav-right">
+    <a class="btn btn-sm" href="index.html#contact">Book a call<span class="btn-icon"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span></a>
+  </div>
+</header>
+
+<main id="main" class="legal wrap">
+<div class="numeral" aria-hidden="true">404</div>
+<h1>This page slipped through.</h1>
+<p>The link may be old or mistyped. Everything we do lives on the home page.</p>
+<p class="actions"><a class="btn" href="index.html">Back to Double Fang<span class="btn-icon"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span></a></p>
 </main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="brand" href="index.html#top"><svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><use href="index.html#i-fang"/></svg>Double Fang</a>
+        <p>AI business models, websites and automations for small businesses. New studio, taking its first clients now.</p>
+        <address>Double Fang<br>Ontario, Canada<br><a href="mailto:jerrydfang@gmail.com">jerrydfang@gmail.com</a></address>
+      </div>
+      <nav aria-label="Site">
+        <h2>Site</h2>
+        <a href="index.html#services">Services</a>
+        <a href="index.html#estimate">Estimate</a>
+        <a href="index.html#process">Process</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="index.html#contact">Book a call</a>
+      </nav>
+      <nav aria-label="Legal">
+        <h2>Legal</h2>
+        <a href="privacy.html">Privacy policy</a>
+        <a href="terms.html">Terms of service</a>
+        <a href="refunds.html">Refund policy</a>
+        <a href="cookies.html">Cookie policy</a>
+        <a href="privacy.html#delete">Delete my data</a>
+        <button type="button" data-open-consent>Privacy choices</button>
+      </nav>
+      <div class="foot-end">
+        <div class="theme-switch" role="radiogroup" aria-label="Color theme">
+          <label><input type="radio" name="theme" value="system"><span>System</span></label>
+          <label><input type="radio" name="theme" value="light"><span>Light</span></label>
+          <label><input type="radio" name="theme" value="dark"><span>Dark</span></label>
+        </div>
+        <a class="link" href="index.html#top">Back to top</a>
+      </div>
+    </div>
+    <div class="foot-base">
+      <span>&copy; <span id="year">2026</span> Double Fang</span>
+      <span>Examples on this page show the kind of work we do. They are not client case studies.</span>
+      <a class="link" href="licenses.html">Fonts and icons licenses</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/site.js" defer></script>
 </body>
 </html>
