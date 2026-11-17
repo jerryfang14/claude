@@ -86,14 +86,49 @@ const PHONE = { viewport: { width: 390, height: 760 }, hasTouch: true, isMobile:
   await jump(p, '.world-body'); await p.waitForTimeout(1600); await shot(p, 'd-bento');
   check('chat demo plays', await p.evaluate(() => document.querySelectorAll('#chat .msg').length) > 0);
 
-  // 3D stack
-  const stackAt = async f => { await scrub(p, '#inside', '.inside-stage', f); return p.evaluate(() => ({ ghost: document.querySelectorAll('.sheet.ghost').length, focus: [...document.querySelectorAll('.sheet')].findIndex(s => s.classList.contains('focus')), cap: [...document.querySelectorAll('.cap')].findIndex(c => c.classList.contains('on')), z: [...document.querySelectorAll('.sheet')].map(s => new DOMMatrix(s.style.transform).m43) })); };
+  // 3D stack. Fades and slides follow the scroll and then settle, so each reading waits for the settle.
+  const stackAt = async f => {
+    await scrub(p, '#inside', '.inside-stage', f); await p.waitForTimeout(900);
+    return p.evaluate(() => {
+      const sheets = [...document.querySelectorAll('#stack .sheet')];
+      const face = sheets.map(s => +getComputedStyle(s.querySelector('.face')).opacity);
+      const ring = sheets.map(s => +getComputedStyle(s.querySelector('.face'), '::after').opacity);
+      const caps = [...document.querySelectorAll('#inside .cap')].map(c => +getComputedStyle(c).opacity);
+      return { ghost: face.filter(o => o < 0.5).length, focus: ring.findIndex(o => o > 0.9), cap: caps.findIndex(o => o > 0.9), z: sheets.map(s => Math.round(new DOMMatrix(s.style.transform).m43)) };
+    });
+  };
   const s0 = await stackAt(0); await shot(p, 'd-inside-0');
   const s3 = await stackAt(0.55); await shot(p, 'd-inside-55');
   const s9 = await stackAt(1); await shot(p, 'd-inside-100');
   check('stack starts closed', s0.cap === 0 && s0.focus === -1 && Math.abs(s0.z[4] - s0.z[0]) < 2, JSON.stringify(s0));
   check('stack opens and focuses the agent layer', s3.cap === 3 && s3.focus === 2 && s3.ghost === 2 && s3.z[4] - s3.z[0] > 250, JSON.stringify(s3));
   check('stack closes again', s9.cap === 6 && s9.focus === -1 && s9.ghost === 0 && Math.abs(s9.z[4] - s9.z[0]) < 2, JSON.stringify(s9));
+
+  // Smoothness: wheel through three layers and watch every frame. A snap shows up as a big change inside 50 ms.
+  await scrub(p, '#inside', '.inside-stage', 0.286); await p.waitForTimeout(900);
+  await p.evaluate(() => {
+    const faces = [...document.querySelectorAll('#stack .face')], caps = [...document.querySelectorAll('#inside .cap')];
+    window.__rec = [];
+    const tick = t => { window.__rec.push({ t, f: faces.map(e => +getComputedStyle(e).opacity), c: caps.map(e => +getComputedStyle(e).opacity) }); window.__raf = requestAnimationFrame(tick); };
+    window.__raf = requestAnimationFrame(tick);
+  });
+  await p.mouse.move(400, 500);
+  for (let i = 0; i < 9; i++) { await p.mouse.wheel(0, 100); await p.waitForTimeout(110); }
+  await p.waitForTimeout(1700);
+  const glide = await p.evaluate(() => {
+    cancelAnimationFrame(window.__raf);
+    const rec = window.__rec; let worst = 0, both = 0;
+    for (let i = 1; i < rec.length; i++) {
+      let j = i; while (j > 0 && rec[i].t - rec[j - 1].t <= 50) j--;
+      const now = rec[i].f.concat(rec[i].c), then = rec[j].f.concat(rec[j].c);
+      now.forEach((v, k) => { worst = Math.max(worst, Math.abs(v - then[k])); });
+      both = Math.max(both, rec[i].c.slice().sort((a, b) => b - a)[1]);
+    }
+    const last = rec[rec.length - 1];
+    return { frames: rec.length, worstIn50ms: +worst.toFixed(3), twoCaptionsAtOnce: +both.toFixed(3), clearCaptions: last.c.filter(o => o > 0.95).length, faces: last.f.map(o => +o.toFixed(2)) };
+  });
+  check('stack fades glide with the scroll and never snap', glide.frames > 40 && glide.worstIn50ms < 0.25 && glide.twoCaptionsAtOnce < 0.12, JSON.stringify(glide));
+  check('stopping part way through a change still rests on one clear state', glide.clearCaptions === 1 && glide.faces.every(o => o > 0.98 || o < 0.18), JSON.stringify(glide));
 
   // Estimate
   await jump(p, '#estimate'); await p.waitForTimeout(900);

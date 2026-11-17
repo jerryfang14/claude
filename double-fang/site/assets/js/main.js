@@ -471,7 +471,14 @@
     cell.addEventListener('pointerleave', function () { el.classList.add('open'); });
   })();
 
-  /* ---------- Inside one build: the stack comes apart as you scroll ---------- */
+  /* ---------- Inside one build: the stack comes apart as you scroll ----------
+     Three rules keep this section smooth.
+     1. Where things are going comes from the scroll. The focus passes from one layer to the next
+        through a "hand-off", a stretch of scroll that every slide, fade and caption shares.
+     2. How fast they may get there comes from time. Each hand-off follows its target through two
+        soft steps, so it starts gently, stops gently and cannot snap, however hard the page is flicked.
+     3. Nothing rests half way. If the scroll stops inside a hand-off, the hand-off finishes on its
+        own in the direction the page was heading. */
   (function inside() {
     var section = $('#inside'), stageEl = $('.inside-stage', section), scene = $('#stack-scene'), stack = $('#stack');
     var sheets = $$('.sheet', stack);                      /* bottom to top */
@@ -479,45 +486,83 @@
     if (reduce) return;
     section.classList.add('scrub');
     var GAP = 78, PULL = 84, LIFT = 46, FIRST = 0.22, LAST = 0.88, STEP = (LAST - FIRST) / 5;
-    var top = 0, span = 1, fit = 1, lastY = null, mx = 0, my = 0, tmx = 0, tmy = 0, lastCap = -1, lastFocus = -2;
+    var HAND = 0.28;                                       /* half the length of a hand-off, in layer steps */
+    var TAU = 70;                                          /* ms per soft step for the stack as a whole (opening, closing, turning) */
+    var SOFT = 160;                                        /* ms per soft step for a hand-off: a full one takes most of a second */
+    var IDLE = 260;                                        /* ms without scrolling before a half-done hand-off finishes itself */
+    var top = 0, span = 1, fit = 1, p = -1, pa = 0, drawn = -1, calm = true, wasIdle = false, lastT = 0;
+    var lastGoal = -1, dir = 0, movedAt = -1e6, mx = 0, my = 0, tmx = 0, tmy = 0;
+    var H = [], hold = [-1, -1, -1, -1, -1, -1], memo = { f: [], g: [], o: [], y: [] };
+    function put(el, name, v, i, seen) { var s = v.toFixed(3); if (seen[i] !== s) { el.style.setProperty(name, s); seen[i] = s; } }
     onMeasure(function () {
-      top = section.getBoundingClientRect().top + window.scrollY;
-      span = Math.max(1, section.offsetHeight - stageEl.offsetHeight);
+      var newTop = section.getBoundingClientRect().top + window.scrollY;
+      var newSpan = Math.max(1, section.offsetHeight - stageEl.offsetHeight);
+      /* Only a real change of layout jumps to the right frame. A phone's address bar sliding away
+         also fires a resize, and that must not cut a fade short. */
+      if (Math.abs(newTop - top) > 1 || Math.abs(newSpan - span) > 1) p = -1;
+      top = newTop; span = newSpan;
       fit = clamp(Math.min(scene.offsetWidth / 640, scene.offsetHeight / 560), 0.4, 1.15);
-      lastY = null;
+      drawn = -1;
     });
     if (fine) section.addEventListener('pointermove', function (e) {
       tmx = e.clientX / window.innerWidth - 0.5; tmy = e.clientY / window.innerHeight - 0.5;
     });
-    whileVisible(section, function () {
-      var y = window.scrollY;
+    whileVisible(section, function (t) {
+      var goal = clamp((window.scrollY - top) / span, 0, 1), dt = t - lastT, n;
+      var jump = p < 0 || dt > 250;                        /* first frame, or back on screen: start in place */
+      lastT = t;
+      if (lastGoal < 0) lastGoal = goal;
+      else if (goal !== lastGoal) { dir = goal > lastGoal ? 1 : -1; lastGoal = goal; movedAt = t; }
+      var idle = t - movedAt > IDLE;
+      if (jump) pa = p = goal;
+      else {
+        var kp = 1 - Math.exp(-dt / TAU);
+        pa += (goal - pa) * kp; p += (pa - p) * kp;
+        if (Math.abs(goal - p) < 0.0003 && Math.abs(goal - pa) < 0.0003) pa = p = goal;
+      }
       var drifting = Math.abs(tmx - mx) > 0.002 || Math.abs(tmy - my) > 0.002;
-      if (y === lastY && !drifting) return;
-      lastY = y;
+      if (p === drawn && calm && idle === wasIdle && !drifting) return;
+      drawn = p; wasIdle = idle;
       mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08;
-      var p = clamp((y - top) / span, 0, 1);
+
+      /* Hand-off n passes the focus from layer n - 1 to layer n. Hand-off 0 starts the first layer and
+         hand-off 5 lets go of the last. H[n][1] is how far along it is on screen, 0 to 1. */
+      var soft = jump ? 1 : 1 - Math.exp(-dt / SOFT), seg = (goal - FIRST) / STEP, rest = 0;
+      for (n = 0; n < 6; n++) {
+        var raw = ramp(seg, n - HAND, n + HAND), s = H[n] || (H[n] = [raw, raw]);
+        if (raw <= 0 || raw >= 1) hold[n] = -1;                                              /* the scroll is not inside this hand-off */
+        else if (idle) { if (hold[n] < 0) hold[n] = dir > 0 || (dir === 0 && raw >= 0.5) ? 1 : 0; }   /* resting inside it: finish the way the page was heading */
+        else if ((hold[n] === 1 && dir < 0) || (hold[n] === 0 && dir > 0)) hold[n] = -1;      /* moving again, the other way: let go */
+        var aim = hold[n] < 0 ? raw : hold[n];
+        s[0] += (aim - s[0]) * soft; s[1] += (s[0] - s[1]) * soft;
+        var gap = Math.max(Math.abs(aim - s[0]), Math.abs(aim - s[1]));
+        if (gap < 0.0015) s[0] = s[1] = aim; else if (gap > rest) rest = gap;
+      }
+      calm = rest === 0;
+
       var close = ease(ramp(p, LAST, 0.98));
       var apart = ease(ramp(p, 0.08, FIRST)) * (1 - close);
-      var seg = (p - FIRST) / STEP;
-      var focus = p < FIRST || p >= LAST ? -1 : Math.min(4, Math.floor(seg));
-      var local = seg - focus;
-      var out = focus < 0 ? 0 : ease(ramp(local, 0, 0.28)) * (1 - ease(ramp(local, 0.74, 1)));
-      var at = 4 - focus;                                  /* index of the focused sheet */
-      for (var i = 0; i < 5; i++) {
-        var mine = i === at, above = focus >= 0 && i > at;
-        var z = (i - 2) * GAP * apart + (mine ? 10 * out : above ? LIFT * out : 0);
-        sheets[i].style.transform = 'translate3d(' + (mine ? PULL * out : 0).toFixed(1) + 'px,0,' + z.toFixed(1) + 'px)';
-      }
-      if (focus !== lastFocus) {
-        sheets.forEach(function (s, i) { s.classList.toggle('focus', focus >= 0 && i === at); s.classList.toggle('ghost', focus >= 0 && i > at); });
-        lastFocus = focus;
+      for (n = 0; n < 5; n++) {                            /* layer n, counted from the top, is sheet 4 - n */
+        var i = 4 - n, here = H[n][1], below = H[n + 1][1], back = 0.12 * (3 - n);
+        var f = here * (1 - below);                                                /* 0 to 1: this layer is the one pulled out */
+        var g = n < 4 ? below * (1 - ramp(H[5][1], back, back + 0.64)) : 0;        /* 0 to 1: the focus is below, so this layer steps aside */
+        var z = (i - 2) * GAP * apart + 10 * f + LIFT * g;
+        sheets[i].style.transform = 'translate3d(' + (PULL * f).toFixed(1) + 'px,0,' + z.toFixed(1) + 'px)';
+        put(sheets[i], '--f', f, i, memo.f);
+        put(sheets[i], '--g', g, i, memo.g);
       }
       var tx = 58 - 30 * close - my * 8;
       var tz = -34 + 30 * ramp(p, 0.08, 0.9) - 4 * close + mx * 10;
       stack.style.setProperty('--sh', (-30 - GAP * 2.3 * apart).toFixed(0) + 'px');
       stack.style.transform = 'scale(' + fit.toFixed(3) + ') rotateX(' + tx.toFixed(2) + 'deg) rotateZ(' + tz.toFixed(2) + 'deg)';
-      var c = focus < 0 ? (p < FIRST ? 0 : 6) : focus + 1;
-      if (c !== lastCap) { caps.forEach(function (el, i) { el.classList.toggle('on', i === c); }); lastCap = c; }
+
+      /* Captions swap inside the same hand-offs: the old one is gone before the new one shows, so two never overlap. */
+      for (var c = 0; c < 7; c++) {
+        var arrive = c === 0 ? 1 : ramp(H[c - 1][1], 0.52, 1), leave = c === 6 ? 0 : ramp(H[c][1], 0, 0.56);
+        var o = (arrive * (1 - leave)).toFixed(3), y = (16 * (1 - arrive) - 12 * leave).toFixed(1);
+        if (memo.o[c] !== o) { caps[c].style.opacity = o; memo.o[c] = o; }
+        if (memo.y[c] !== y) { caps[c].style.transform = 'translate3d(0,' + y + 'px,0)'; memo.y[c] = y; }
+      }
     });
   })();
 

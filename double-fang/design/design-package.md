@@ -64,7 +64,7 @@ A rounded red bar (the jaw line) over two inward-curving fangs. Two fangs for th
 ### Shape, motion, theme
 - **Shape:** media shells 28px outer and 22px inner. Controls are full pills, inputs 12px. In the blue world, cards are rounded white tiles.
 - **Clouds:** soft CSS gradients that drift slowly. No image files.
-- **Motion:** `--ease-out` cubic-bezier(0.16,1,0.3,1) for entrances, `--ease-spring` cubic-bezier(0.32,0.72,0,1) for interaction. One shared animation loop. No scroll listeners.
+- **Motion:** `--ease-out` cubic-bezier(0.16,1,0.3,1) for entrances, `--ease-spring` cubic-bezier(0.32,0.72,0,1) for interaction. One shared animation loop. No scroll listeners. Scroll-driven fades never run on a fixed timer: the scroll says where a value is going, and a short glide in time limits how fast it gets there.
 - **Theme:** light by default, because the palette is a daytime sky. A System / Light / Dark switch sits in the footer. The page uses `data-mode` on `<html>`, not `data-theme`, so a preview host cannot flip it by accident.
 
 ## 5. The five showpiece interactions
@@ -74,7 +74,7 @@ Each one has a job, a touch version and a still version for people who turn moti
 |---|---|---|---|---|---|
 | 1 | Breaking the fourth wall: a finger wipes fog | Top of Services | A round window is fogged over. A finger writes "hi" in the fog, then the visitor wipes it clear with the cursor. Drips run down. "Clear it for me" does the same by button. | Wipe with a real finger | The window is left out |
 | 2 | Portal | Same spot, on scroll | The wiped window grows until the sky inside it fills the screen. The visitor passes through into the blue Services world. | Same, scroll driven | The section opens as a plain blue panel with its heading |
-| 3 | 3D product | "Look inside one build" | The example roofing site lifts apart into five floating layers: Page, Words, Agent, Wiring, Tools. Scroll steps through them one at a time, each sliding out with its caption, then the stack closes. It tilts a little with the cursor. | Same, scaled to fit | The stack sits open and still, with all five captions listed beside it |
+| 3 | 3D product | "Look inside one build" | The example roofing site lifts apart into five floating layers: Page, Words, Agent, Wiring, Tools. Scroll steps through them one at a time, each sliding out with its caption, then the stack closes. It tilts a little with the cursor. Every slide, fade and caption follows the scroll and also eases in time, so nothing snaps even on a hard flick. If the scroll stops half way through a change, the change finishes by itself. | Same, scaled to fit | The stack sits open and still, with all five captions listed beside it |
 | 4 | Object reveal on hover | "Things we can build for you" | Six plain rows. Hovering a row makes a small mock-up of that build appear and follow the cursor. Keyboard focus shows it too. | Each mock-up sits under its row and pops in on scroll | Still appears on hover, with no glide or tilt |
 | 5 | 3D sphere gallery | "Pick what eats your week" | Thirty everyday chores on a globe that turns slowly. Drag to spin it, tap to pick, and the picks carry into the form. Arrow keys and space work as well. | Sixteen tiles on a smaller globe, tap to pick | Globe holds still until you move it |
 

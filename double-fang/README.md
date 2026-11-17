@@ -47,13 +47,13 @@ python3 design/tools/bundle.py out.html            # one-file preview with every
 ## Test
 ```bash
 python3 -m http.server 8765 -d site &
-node design/tests/selftest.mjs      # 69 checks on desktop and phone, screenshots land in design/tests/shots/
+node design/tests/selftest.mjs      # 71 checks on desktop and phone, screenshots land in design/tests/shots/
 python3 design/tests/contrast.py    # color contrast math for both themes
 python3 design/tests/copygate.py    # copy rules: no dashes, no stock words
 ```
 The self-test covers every animation, the form, the privacy banner, the legal pages, keyboard use, reduced motion, and it fails if the page calls any other website.
 
-Last run: 69 of 69 checks passed, 0 contrast failures, 0 copy gate hits. Lighthouse with the compressed server: 99 / 100 / 100 / 100 on mobile and 100 / 100 / 100 / 100 on desktop (performance, accessibility, best practices, SEO).
+Last run: 71 of 71 checks passed, 0 contrast failures, 0 copy gate hits. Lighthouse with the compressed server: 99 / 100 / 100 / 100 on mobile and 100 / 100 / 100 / 100 on desktop (performance, accessibility, best practices, SEO).
 
 ## Honest notes
 - **The form uses the visitor's own email app.** Pressing the button opens a ready-to-send email to the studio address. The site itself sends nothing and stores nothing. If you want notes to arrive without that extra tap, connect a form service, then name it in the privacy policy.

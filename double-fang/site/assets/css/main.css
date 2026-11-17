@@ -388,11 +388,11 @@ main, footer { position: relative; z-index: var(--z-content); }
 .stack { position: relative; width: 360px; height: 250px; flex: none; transform-style: preserve-3d; transform: scale(var(--fit, 1)) rotateX(58deg) rotateZ(-32deg); will-change: transform; }
 .stack::before { content: ""; position: absolute; inset: -4%; border-radius: 40px; background: rgba(0, 34, 70, 0.4); filter: blur(30px); transform: translateZ(var(--sh, -210px)); }
 .sheet { position: absolute; inset: 0; border-radius: 22px; color: var(--ink); transform-style: preserve-3d; will-change: transform; }
-.sheet::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--surface-2); transform: translateZ(-8px); transition: opacity 0.45s var(--ease-out); }
-.face { position: absolute; inset: 0; padding: 16px 18px 18px; border-radius: inherit; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); transition: opacity 0.45s var(--ease-out), box-shadow 0.4s var(--ease-spring); }
-.sheet.focus .face { box-shadow: inset 0 0 0 2.5px var(--red); }
-.sheet.ghost .face { opacity: 0.16; }
-.sheet.ghost::before { opacity: 0.1; }
+/* --g (0 to 1) fades a layer that has stepped aside. --f (0 to 1) rings the layer in focus. The script writes both
+   from the scroll position on every frame, so there are no timed transitions here to fight it. */
+.sheet::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--surface-2); transform: translateZ(-8px); opacity: calc(1 - 0.9 * var(--g, 0)); }
+.face { position: absolute; inset: 0; padding: 16px 18px 18px; border-radius: inherit; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); opacity: calc(1 - 0.84 * var(--g, 0)); }
+.face::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 2.5px var(--red); opacity: var(--f, 0); pointer-events: none; }
 .sheet:nth-child(1) { transform: translate3d(0, 0, -150px); }
 .sheet:nth-child(2) { transform: translate3d(0, 0, -75px); }
 .sheet:nth-child(3) { transform: translate3d(0, 0, 0); }
@@ -414,11 +414,11 @@ main, footer { position: relative; z-index: var(--z-content); }
 .st span { display: flex; align-items: center; gap: 10px; padding: 16px 14px; border-radius: 14px; background: var(--surface); font-size: 14px; font-weight: 500; }
 .st .ic { font-size: 22px; color: var(--sky-text); }
 
-.inside.scrub { height: 360vh; }
+.inside.scrub { height: 420vh; }
+.inside.scrub .face { will-change: opacity; }
 .inside.scrub .inside-stage { position: sticky; top: 0; height: 100vh; height: 100svh; padding-block: calc(96px + var(--safe-top)) 28px; display: flex; overflow: hidden; }
 .inside.scrub .caps { gap: 0; min-height: 150px; align-items: start; }
-.inside.scrub .cap { grid-area: 1 / 1; display: block; opacity: 0; pointer-events: none; transform: translateY(18px); transition: opacity 0.45s var(--ease-out), transform 0.6s var(--ease-out); }
-.inside.scrub .cap.on { opacity: 1; transform: none; }
+.inside.scrub .cap { grid-area: 1 / 1; display: block; opacity: 0; pointer-events: none; will-change: opacity, transform; }
 .inside.scrub .stack-scene { height: 100%; min-height: 0; }
 
 /* ---------- Estimate ---------- */

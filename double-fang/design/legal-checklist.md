@@ -47,7 +47,7 @@ Three kinds of status are used below:
 ## How the checks run
 ```bash
 python3 -m http.server 8765 -d site &
-node design/tests/selftest.mjs     # 69 checks
+node design/tests/selftest.mjs     # 71 checks
 python3 design/tests/contrast.py   # contrast, both themes
 ```
 The self-test checks that fit this list: the banner shows on a first visit, both choices look the same, nothing is stored before a choice, "Essential only" keeps analytics off, "Privacy choices" reopens the banner, there are still no cookies, the consent box is required and not pre-ticked, the "Delete my data" link preselects the request, all internal links resolve, every stop has a focus ring, and no request leaves the site.
